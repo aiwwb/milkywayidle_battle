@@ -27,6 +27,7 @@ class CombatUnit {
     drinks = [null, null, null];
     houseRooms = [];
     achievements = null;
+    shrines = [];
     dropTable = [];
     rareDropTable = [];
     abilityManaCosts = new Map();
@@ -180,13 +181,15 @@ class CombatUnit {
             });
         });
 
+        let maxHitpointsRatioBoost = this.getBuffBoost("/buff_types/max_hitpoints").ratioBoost;
         this.combatDetails.maxHitpoints = Math.floor(
             (10 * (10 + this.combatDetails.staminaLevel) + this.combatDetails.combatStats.maxHitpoints)
-            * (1 + this.combatDetails.combatStats.maxHitpointsRatio)
+            * (1 + this.combatDetails.combatStats.maxHitpointsRatio + maxHitpointsRatioBoost)
         );
+        let maxManapointsRatioBoost = this.getBuffBoost("/buff_types/max_manapoints").ratioBoost;
         this.combatDetails.maxManapoints = Math.floor(
             (10 * (10 + this.combatDetails.intelligenceLevel) + this.combatDetails.combatStats.maxManapoints)
-            * (1 + this.combatDetails.combatStats.maxManapointsRatio)
+            * (1 + this.combatDetails.combatStats.maxManapointsRatio + maxManapointsRatioBoost)
         );
 
         let accuracyRatioBoostFromFury = this.getBuffBoost("/buff_types/fury_accuracy").ratioBoost;
@@ -446,6 +449,13 @@ class CombatUnit {
         for (let i = 0; i < this.houseRooms.length; i++) {
             const houseRoom = this.houseRooms[i];
             houseRoom.buffs.forEach(buff => {
+                this.addPermanentBuff(buff);
+            });
+        }
+
+        for (let i = 0; i < this.shrines.length; i++) {
+            const shrine = this.shrines[i];
+            shrine.buffs.forEach(buff => {
                 this.addPermanentBuff(buff);
             });
         }

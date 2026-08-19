@@ -208,6 +208,12 @@
                                 House Rooms
                             </button>
                         </div>
+                        <div class="row mb-2">
+                            <button id="buttonShrinesModal" class="btn btn-primary" type="button"
+                                data-bs-toggle="modal" data-bs-target="#shrinesModal" data-i18n="characterManagement.shrine">
+                                Shrines
+                            </button>
+                        </div>
                         <!-- #endregion -->
                         <div class="row">
                             <b data-i18n="common:priceSettings.title">Price Settings</b>
@@ -1958,6 +1964,26 @@
                 <div class="modal-body">
                     <div class="container-fluid">
                         <div id="achievementsList"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="common:controls.close">Close</button>
+                </div>
+            </div>
+        </div>
+        <!-- #endregion -->
+    </div>
+    <div class="modal" id="shrinesModal" tabindex="-1">
+        <!-- #region Shrines Modal -->
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" data-i18n="characterManagement.shrine">Shrines</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div id="shrinesList"></div>
                     </div>
                 </div>
                 <div class="modal-footer">

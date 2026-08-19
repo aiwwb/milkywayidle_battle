@@ -1,0 +1,107 @@
+{
+    "/shrines/power": {
+        "hrid": "/shrines/power",
+        "name": "Power Shrine",
+        "sortIndex": 1,
+        "buffs": [
+            {
+                "uniqueHrid": "/buff_uniques/shrine_power_damage",
+                "typeHrid": "/buff_types/damage",
+                "ratioBoost": 0.003,
+                "ratioBoostLevelBonus": 0.003,
+                "flatBoost": 0,
+                "flatBoostLevelBonus": 0,
+                "startTime": "0001-01-01T00:00:00Z",
+                "duration": 0
+            }
+        ]
+    },
+    "/shrines/rhythm": {
+        "hrid": "/shrines/rhythm",
+        "name": "Rhythm Shrine",
+        "sortIndex": 2,
+        "buffs": [
+            {
+                "uniqueHrid": "/buff_uniques/shrine_rhythm_attack_speed",
+                "typeHrid": "/buff_types/attack_speed",
+                "ratioBoost": 0.004,
+                "ratioBoostLevelBonus": 0.004,
+                "flatBoost": 0,
+                "flatBoostLevelBonus": 0,
+                "startTime": "0001-01-01T00:00:00Z",
+                "duration": 0
+            },
+            {
+                "uniqueHrid": "/buff_uniques/shrine_rhythm_cast_speed",
+                "typeHrid": "/buff_types/cast_speed",
+                "ratioBoost": 0,
+                "ratioBoostLevelBonus": 0,
+                "flatBoost": 0.004,
+                "flatBoostLevelBonus": 0.004,
+                "startTime": "0001-01-01T00:00:00Z",
+                "duration": 0
+            }
+        ]
+    },
+    "/shrines/spirit": {
+        "hrid": "/shrines/spirit",
+        "name": "Spirit Shrine",
+        "sortIndex": 3,
+        "buffs": [
+            {
+                "uniqueHrid": "/buff_uniques/shrine_spirit_max_hitpoints",
+                "typeHrid": "/buff_types/max_hitpoints",
+                "ratioBoost": 0.01,
+                "ratioBoostLevelBonus": 0.01,
+                "flatBoost": 0,
+                "flatBoostLevelBonus": 0,
+                "startTime": "0001-01-01T00:00:00Z",
+                "duration": 0
+            },
+            {
+                "uniqueHrid": "/buff_uniques/shrine_spirit_max_manapoints",
+                "typeHrid": "/buff_types/max_manapoints",
+                "ratioBoost": 0.01,
+                "ratioBoostLevelBonus": 0.01,
+                "flatBoost": 0,
+                "flatBoostLevelBonus": 0,
+                "startTime": "0001-01-01T00:00:00Z",
+                "duration": 0
+            }
+        ]
+    },
+    "/shrines/rare": {
+        "hrid": "/shrines/rare",
+        "name": "Rare Shrine",
+        "sortIndex": 4,
+        "buffs": [
+            {
+                "uniqueHrid": "/buff_uniques/shrine_rare_rare_find",
+                "typeHrid": "/buff_types/rare_find",
+                "ratioBoost": 0,
+                "ratioBoostLevelBonus": 0,
+                "flatBoost": 0.015,
+                "flatBoostLevelBonus": 0.015,
+                "startTime": "0001-01-01T00:00:00Z",
+                "duration": 0
+            }
+        ]
+    },
+    "/shrines/scholar": {
+        "hrid": "/shrines/scholar",
+        "name": "Scholar Shrine",
+        "sortIndex": 5,
+        "buffs": [
+            {
+                "uniqueHrid": "/buff_uniques/shrine_scholar_wisdom",
+                "typeHrid": "/buff_types/wisdom",
+                "ratioBoost": 0,
+                "ratioBoostLevelBonus": 0,
+                "flatBoost": 0.005,
+                "flatBoostLevelBonus": 0.005,
+                "startTime": "0001-01-01T00:00:00Z",
+                "duration": 0
+            }
+        ]
+    }
+}

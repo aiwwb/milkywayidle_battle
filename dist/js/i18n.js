@@ -1531,6 +1531,7 @@
                         equipment: "Equipment",
                         abilities: "Abilities",
                         house: "House",
+                        shrine: "Shrines",
                         loadouts: "Loadouts"
                     },
                     inventory: {
@@ -5509,6 +5510,13 @@
                         "/house_rooms/archery_range": "Archery Range",
                         "/house_rooms/mystical_study": "Mystical Study"
                     },
+                    shrineNames: {
+                        "/shrines/power": "Power Shrine",
+                        "/shrines/rhythm": "Rhythm Shrine",
+                        "/shrines/spirit": "Spirit Shrine",
+                        "/shrines/rare": "Rare Shrine",
+                        "/shrines/scholar": "Scholar Shrine"
+                    },
                     purchaseBundleNames: {
                         "/purchase_bundles/cowbells_500": "500 Cowbells",
                         "/purchase_bundles/cowbells_1050": "1050 Cowbells",
@@ -7508,6 +7516,7 @@
                         equipment: "\u88c5\u5907",
                         abilities: "\u6280\u80fd",
                         house: "\u623f\u5c4b",
+                        shrine: "\u795e\u9f9b",
                         loadouts: "\u914d\u88c5"
                     },
                     inventory: {
@@ -11485,6 +11494,13 @@
                         "/house_rooms/gym": "\u5065\u8eab\u623f",
                         "/house_rooms/archery_range": "\u5c04\u7bad\u573a",
                         "/house_rooms/mystical_study": "\u795e\u79d8\u7814\u7a76\u5ba4"
+                    },
+                    shrineNames: {
+                        "/shrines/power": "\u529b\u91cf\u795e\u9f9b",
+                        "/shrines/rhythm": "\u8282\u594f\u795e\u9f9b",
+                        "/shrines/spirit": "\u7cbe\u795e\u795e\u9f9b",
+                        "/shrines/rare": "\u7a00\u6709\u795e\u9f9b",
+                        "/shrines/scholar": "\u5b66\u8005\u795e\u9f9b"
                     },
                     purchaseBundleNames: {
                         "/purchase_bundles/cowbells_500": "500\u4e2a\u725b\u94c3",

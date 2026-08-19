@@ -17,6 +17,7 @@ import combatStyleDetailMap from "./combatsimulator/data/combatStyleDetailMap.js
 import openableLootDropMap from "./combatsimulator/data/openableLootDropMap.json";
 import achievementTierMap from "./combatsimulator/data/achievementTierDetailMap.json"
 import achievementDetailMap from "./combatsimulator/data/achievementDetailMap.json"
+import shrineDetailMap from "./combatsimulator/data/shrineDetailMap.json"
 
 import patchNote from "../patchNote.json";
 
@@ -186,6 +187,52 @@ function createHouseInput(hrid) {
     levelInput.max = 8;
     levelInput.step = 1;
     levelInput.dataset.houseHrid = hrid;
+
+    return levelInput;
+}
+
+function initShrinesModal() {
+    let shrinesList = document.getElementById("shrinesList");
+    let newChildren = [];
+    let shrines = Object.values(shrineDetailMap).sort((a, b) => a.sortIndex - b.sortIndex);
+    player.shrines = {};
+
+    for (const shrine of Object.values(shrines)) {
+        player.shrines[shrine.hrid] = 0;
+
+        let row = createElement("div", "row mb-2");
+
+        let nameCol = createElement("div", "col-md-4 offset-md-3 align-self-center", shrine.name);
+        nameCol.setAttribute("data-i18n", "shrineNames." + shrine.hrid);
+        row.appendChild(nameCol);
+
+        let levelCol = createElement("div", "col-md-2");
+        let levelInput = createShrineInput(shrine.hrid);
+
+        levelInput.addEventListener("input", function (e) {
+            let inputValue = e.target.value;
+            const hrid = e.target.dataset.shrineHrid;
+            player.shrines[hrid] = parseInt(inputValue);
+        });
+
+        levelCol.appendChild(levelInput);
+        row.appendChild(levelCol);
+
+        newChildren.push(row);
+    }
+
+    shrinesList.replaceChildren(...newChildren);
+}
+
+function createShrineInput(hrid) {
+    let levelInput = document.createElement("input");
+    levelInput.className = "form-control";
+    levelInput.type = "number";
+    levelInput.placeholder = 0;
+    levelInput.min = 0;
+    levelInput.max = 8;
+    levelInput.step = 1;
+    levelInput.dataset.shrineHrid = hrid;
 
     return levelInput;
 }
@@ -3202,6 +3249,7 @@ function parsePlayerJson(playerJson, hrid) {
         abilities: [],
         ...playerJson.player,
         houseRooms: playerJson.houseRooms,
+        shrines: playerJson.shrines,
     };
     playerData.equipment = {};
     const triggerMap = playerJson.triggerMap;
@@ -3235,6 +3283,7 @@ function parsePlayerJson(playerJson, hrid) {
     player.updateCombatDetails();
     player.houseRooms = playerJson.houseRooms;
     player.achievements = playerJson.achievements ?? {};
+    player.shrines = playerJson.shrines ?? {};
     return player;
 }
 // read JSON file to simulate
@@ -3755,6 +3804,7 @@ function getEquipmentSetFromUI() {
         triggerMap: {},
         houseRooms: {},
         achievements: {},
+        shrines: {},
     };
 
     ["stamina", "intelligence", "attack", "melee", "defense", "ranged", "magic"].forEach((skill) => {
@@ -3795,6 +3845,7 @@ function getEquipmentSetFromUI() {
 
     equipmentSet.houseRooms = player.houseRooms;
     equipmentSet.achievements = player.achievements;
+    equipmentSet.shrines = player.shrines;
 
     return equipmentSet;
 }
@@ -3900,6 +3951,25 @@ function loadEquipmentSetIntoUI(equipmentSet) {
             const field = document.querySelector('[data-house-hrid="' + room.hrid + '"]');
             field.value = '';
             player.houseRooms[room.hrid] = 0;
+        }
+    }
+
+    if (equipmentSet.shrines) {
+        for (const shrine in equipmentSet.shrines) {
+            const field = document.querySelector('[data-shrine-hrid="' + shrine + '"]');
+            if (equipmentSet.shrines[shrine]) {
+                field.value = equipmentSet.shrines[shrine];
+            } else {
+                field.value = '';
+            }
+        }
+        player.shrines = equipmentSet.shrines;
+    } else {
+        let shrines = Object.values(shrineDetailMap);
+        for (const shrine of Object.values(shrines)) {
+            const field = document.querySelector('[data-shrine-hrid="' + shrine.hrid + '"]');
+            field.value = '';
+            player.shrines[shrine.hrid] = 0;
         }
     }
 
@@ -4036,7 +4106,8 @@ function doSoloExport() {
         zone: zoneSelect.value,
         simulationTime: simulationTimeInput.value,
         houseRooms: player.houseRooms,
-        achievements: player.achievements
+        achievements: player.achievements,
+        shrines: player.shrines
     };
     try {
         navigator.clipboard.writeText(JSON.stringify(state)).then(() => alert("Current set has been copied to clipboard."));
@@ -4187,6 +4258,25 @@ function doSoloImport() {
         }
     }
 
+    if (importSet.shrines) {
+        for (const shrine in importSet.shrines) {
+            const field = document.querySelector('[data-shrine-hrid="' + shrine + '"]');
+            if (importSet.shrines[shrine]) {
+                field.value = importSet.shrines[shrine];
+            } else {
+                field.value = '';
+            }
+        }
+        player.shrines = importSet.shrines;
+    } else {
+        let shrines = Object.values(shrineDetailMap);
+        for (const shrine of Object.values(shrines)) {
+            const field = document.querySelector('[data-shrine-hrid="' + shrine.hrid + '"]');
+            field.value = '';
+            player.shrines[shrine.hrid] = 0;
+        }
+    }
+
     if (importSet.achievements) {
         for (const achievement in importSet.achievements) {
             const field = document.querySelector('[data-achievement-hrid="' + achievement + '"]');
@@ -4265,7 +4355,8 @@ function savePreviousPlayer(playerId) {
         zone: zoneSelect.value,
         simulationTime: simulationTimeInput.value,
         houseRooms: player.houseRooms,
-        achievements: player.achievements
+        achievements: player.achievements,
+        shrines: player.shrines
     };
     try {
         playerDataMap[playerId] = JSON.stringify(state);
@@ -4385,6 +4476,26 @@ function updateNextPlayer(currentPlayerNumber) {
             }
         }
         player.houseRooms = importSet.houseRooms;
+    }
+
+    { // reset all shrines
+        let shrines = Object.values(shrineDetailMap);
+        for (const shrine of Object.values(shrines)) {
+            const field = document.querySelector('[data-shrine-hrid="' + shrine.hrid + '"]');
+            field.value = '';
+            player.shrines[shrine.hrid] = 0;
+        }
+    }
+    if (importSet.shrines) {
+        for (const shrine in importSet.shrines) {
+            const field = document.querySelector('[data-shrine-hrid="' + shrine + '"]');
+            if (importSet.shrines[shrine]) {
+                field.value = importSet.shrines[shrine];
+            } else {
+                field.value = '';
+            }
+        }
+        player.shrines = importSet.shrines;
     }
 
     { // reset all achievements
@@ -4813,6 +4924,7 @@ function updateContent() {
 
 initEquipmentSection();
 initHouseRoomsModal();
+initShrinesModal();
 initAchievementsModal();
 initLevelSection();
 initFoodSection();

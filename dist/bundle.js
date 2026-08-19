@@ -347,6 +347,7 @@ class CombatUnit {
     drinks = [null, null, null];
     houseRooms = [];
     achievements = null;
+    shrines = [];
     dropTable = [];
     rareDropTable = [];
     abilityManaCosts = new Map();
@@ -500,13 +501,15 @@ class CombatUnit {
             });
         });
 
+        let maxHitpointsRatioBoost = this.getBuffBoost("/buff_types/max_hitpoints").ratioBoost;
         this.combatDetails.maxHitpoints = Math.floor(
             (10 * (10 + this.combatDetails.staminaLevel) + this.combatDetails.combatStats.maxHitpoints)
-            * (1 + this.combatDetails.combatStats.maxHitpointsRatio)
+            * (1 + this.combatDetails.combatStats.maxHitpointsRatio + maxHitpointsRatioBoost)
         );
+        let maxManapointsRatioBoost = this.getBuffBoost("/buff_types/max_manapoints").ratioBoost;
         this.combatDetails.maxManapoints = Math.floor(
             (10 * (10 + this.combatDetails.intelligenceLevel) + this.combatDetails.combatStats.maxManapoints)
-            * (1 + this.combatDetails.combatStats.maxManapointsRatio)
+            * (1 + this.combatDetails.combatStats.maxManapointsRatio + maxManapointsRatioBoost)
         );
 
         let accuracyRatioBoostFromFury = this.getBuffBoost("/buff_types/fury_accuracy").ratioBoost;
@@ -766,6 +769,13 @@ class CombatUnit {
         for (let i = 0; i < this.houseRooms.length; i++) {
             const houseRoom = this.houseRooms[i];
             houseRoom.buffs.forEach(buff => {
+                this.addPermanentBuff(buff);
+            });
+        }
+
+        for (let i = 0; i < this.shrines.length; i++) {
+            const shrine = this.shrines[i];
+            shrine.buffs.forEach(buff => {
                 this.addPermanentBuff(buff);
             });
         }
@@ -1146,6 +1156,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _equipment__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./equipment */ "./src/combatsimulator/equipment.js");
 /* harmony import */ var _houseRoom__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./houseRoom */ "./src/combatsimulator/houseRoom.js");
 /* harmony import */ var _achievement__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./achievement */ "./src/combatsimulator/achievement.js");
+/* harmony import */ var _shrine__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./shrine */ "./src/combatsimulator/shrine.js");
+
 
 
 
@@ -1197,6 +1209,12 @@ class Player extends _combatUnit__WEBPACK_IMPORTED_MODULE_1__["default"] {
         Object.entries(dto.houseRooms).forEach(houseRoom => {
             if (houseRoom[1] > 0) {
                 player.houseRooms.push(new _houseRoom__WEBPACK_IMPORTED_MODULE_4__["default"](houseRoom[0], houseRoom[1]))
+            }
+        });
+
+        Object.entries(dto.shrines ?? {}).forEach(shrine => {
+            if (shrine[1] > 0) {
+                player.shrines.push(new _shrine__WEBPACK_IMPORTED_MODULE_6__["default"](shrine[0], shrine[1]))
             }
         });
 
@@ -1330,6 +1348,46 @@ class Player extends _combatUnit__WEBPACK_IMPORTED_MODULE_1__["default"] {
 }
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Player);
+
+
+/***/ }),
+
+/***/ "./src/combatsimulator/shrine.js":
+/*!***************************************!*\
+  !*** ./src/combatsimulator/shrine.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _buff__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./buff */ "./src/combatsimulator/buff.js");
+/* harmony import */ var _data_shrineDetailMap_json__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./data/shrineDetailMap.json */ "./src/combatsimulator/data/shrineDetailMap.json");
+
+
+
+class Shrine {
+    constructor(hrid, level) {
+        this.hrid = hrid;
+        this.level = level;
+
+        let gameShrine = _data_shrineDetailMap_json__WEBPACK_IMPORTED_MODULE_1__[this.hrid];
+        if (!gameShrine) {
+            throw new Error("No shrine found for hrid: " + this.hrid);
+        }
+
+        this.buffs = [];
+        if (gameShrine.buffs) {
+            for (const shrineBuff of gameShrine.buffs) {
+                let buff = new _buff__WEBPACK_IMPORTED_MODULE_0__["default"](shrineBuff, level);
+                this.buffs.push(buff);
+            }
+        }
+    }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Shrine);
 
 
 /***/ }),
@@ -1686,6 +1744,16 @@ module.exports = /*#__PURE__*/JSON.parse('{"/items/abyssal_essence":{"hrid":"/it
 
 module.exports = /*#__PURE__*/JSON.parse('{"/items/bag_of_10_cowbells":[{"itemHrid":"/items/cowbell","dropRate":1,"minCount":10,"maxCount":10}],"/items/chimerical_chest":[{"itemHrid":"/items/chimerical_essence","dropRate":1,"minCount":400,"maxCount":800},{"itemHrid":"/items/chimerical_essence","dropRate":0.05,"minCount":2000,"maxCount":4000},{"itemHrid":"/items/chimerical_token","dropRate":1,"minCount":250,"maxCount":500},{"itemHrid":"/items/chimerical_token","dropRate":0.05,"minCount":1500,"maxCount":3000},{"itemHrid":"/items/large_treasure_chest","dropRate":0.3,"minCount":1,"maxCount":5},{"itemHrid":"/items/jade","dropRate":0.6,"minCount":5,"maxCount":20},{"itemHrid":"/items/sunstone","dropRate":0.5,"minCount":1,"maxCount":1},{"itemHrid":"/items/shield_bash","dropRate":0.5,"minCount":1,"maxCount":2},{"itemHrid":"/items/crippling_slash","dropRate":0.5,"minCount":1,"maxCount":2},{"itemHrid":"/items/pestilent_shot","dropRate":0.5,"minCount":1,"maxCount":2},{"itemHrid":"/items/griffin_leather","dropRate":0.1,"minCount":1,"maxCount":1},{"itemHrid":"/items/manticore_sting","dropRate":0.06,"minCount":1,"maxCount":1},{"itemHrid":"/items/jackalope_antler","dropRate":0.05,"minCount":1,"maxCount":1},{"itemHrid":"/items/dodocamel_plume","dropRate":0.02,"minCount":1,"maxCount":1},{"itemHrid":"/items/griffin_talon","dropRate":0.02,"minCount":1,"maxCount":1},{"itemHrid":"/items/chimerical_chest_key","dropRate":0.02,"minCount":1,"maxCount":1},{"itemHrid":"/items/chimerical_quiver","dropRate":0.03,"minCount":1,"maxCount":1},{"itemHrid":"/items/griffin_tunic","dropRate":0.003,"minCount":1,"maxCount":1},{"itemHrid":"/items/griffin_chaps","dropRate":0.003,"minCount":1,"maxCount":1},{"itemHrid":"/items/manticore_shield","dropRate":0.003,"minCount":1,"maxCount":1},{"itemHrid":"/items/jackalope_staff","dropRate":0.002,"minCount":1,"maxCount":1},{"itemHrid":"/items/dodocamel_gauntlets","dropRate":0.0015,"minCount":1,"maxCount":1},{"itemHrid":"/items/griffin_bulwark","dropRate":0.0005,"minCount":1,"maxCount":1}],"/items/chimerical_refinement_chest":[{"itemHrid":"/items/chimerical_refinement_shard","dropRate":1,"minCount":1,"maxCount":2},{"itemHrid":"/items/chimerical_refinement_shard","dropRate":0.05,"minCount":5,"maxCount":10}],"/items/enchanted_chest":[{"itemHrid":"/items/enchanted_essence","dropRate":1,"minCount":400,"maxCount":800},{"itemHrid":"/items/enchanted_essence","dropRate":0.05,"minCount":2000,"maxCount":4000},{"itemHrid":"/items/enchanted_token","dropRate":1,"minCount":250,"maxCount":500},{"itemHrid":"/items/enchanted_token","dropRate":0.05,"minCount":1500,"maxCount":3000},{"itemHrid":"/items/large_treasure_chest","dropRate":0.3,"minCount":1,"maxCount":7},{"itemHrid":"/items/amethyst","dropRate":0.6,"minCount":5,"maxCount":20},{"itemHrid":"/items/sunstone","dropRate":0.5,"minCount":1,"maxCount":5},{"itemHrid":"/items/crippling_slash","dropRate":0.5,"minCount":1,"maxCount":2},{"itemHrid":"/items/penetrating_shot","dropRate":0.5,"minCount":1,"maxCount":2},{"itemHrid":"/items/retribution","dropRate":0.5,"minCount":1,"maxCount":2},{"itemHrid":"/items/mana_spring","dropRate":0.5,"minCount":1,"maxCount":2},{"itemHrid":"/items/knights_ingot","dropRate":0.04,"minCount":1,"maxCount":1},{"itemHrid":"/items/bishops_scroll","dropRate":0.04,"minCount":1,"maxCount":1},{"itemHrid":"/items/royal_cloth","dropRate":0.04,"minCount":1,"maxCount":1},{"itemHrid":"/items/regal_jewel","dropRate":0.02,"minCount":1,"maxCount":1},{"itemHrid":"/items/sundering_jewel","dropRate":0.02,"minCount":1,"maxCount":1},{"itemHrid":"/items/enchanted_chest_key","dropRate":0.02,"minCount":1,"maxCount":1},{"itemHrid":"/items/enchanted_cloak","dropRate":0.04,"minCount":1,"maxCount":1},{"itemHrid":"/items/knights_aegis","dropRate":0.002,"minCount":1,"maxCount":1},{"itemHrid":"/items/bishops_codex","dropRate":0.002,"minCount":1,"maxCount":1},{"itemHrid":"/items/royal_water_robe_top","dropRate":0.0004,"minCount":1,"maxCount":1},{"itemHrid":"/items/royal_water_robe_bottoms","dropRate":0.0004,"minCount":1,"maxCount":1},{"itemHrid":"/items/royal_nature_robe_top","dropRate":0.0004,"minCount":1,"maxCount":1},{"itemHrid":"/items/royal_nature_robe_bottoms","dropRate":0.0004,"minCount":1,"maxCount":1},{"itemHrid":"/items/royal_fire_robe_top","dropRate":0.0004,"minCount":1,"maxCount":1},{"itemHrid":"/items/royal_fire_robe_bottoms","dropRate":0.0004,"minCount":1,"maxCount":1},{"itemHrid":"/items/furious_spear","dropRate":0.0003,"minCount":1,"maxCount":1},{"itemHrid":"/items/regal_sword","dropRate":0.0003,"minCount":1,"maxCount":1},{"itemHrid":"/items/sundering_crossbow","dropRate":0.0003,"minCount":1,"maxCount":1}],"/items/enchanted_refinement_chest":[{"itemHrid":"/items/enchanted_refinement_shard","dropRate":1,"minCount":1,"maxCount":2},{"itemHrid":"/items/enchanted_refinement_shard","dropRate":0.05,"minCount":5,"maxCount":10}],"/items/labyrinth_refinement_chest":[{"itemHrid":"/items/labyrinth_refinement_shard","dropRate":1,"minCount":1,"maxCount":2},{"itemHrid":"/items/labyrinth_refinement_shard","dropRate":0.05,"minCount":5,"maxCount":10}],"/items/large_artisans_crate":[{"itemHrid":"/items/coin","dropRate":1,"minCount":30000,"maxCount":60000},{"itemHrid":"/items/coin","dropRate":0.1,"minCount":150000,"maxCount":300000},{"itemHrid":"/items/cowbell","dropRate":0.1,"minCount":5,"maxCount":10},{"itemHrid":"/items/cowbell","dropRate":0.01,"minCount":40,"maxCount":80},{"itemHrid":"/items/shard_of_protection","dropRate":1,"minCount":5,"maxCount":10},{"itemHrid":"/items/mirror_of_protection","dropRate":0.01,"minCount":1,"maxCount":1},{"itemHrid":"/items/pearl","dropRate":0.2,"minCount":1,"maxCount":3},{"itemHrid":"/items/amber","dropRate":0.1333,"minCount":1,"maxCount":3},{"itemHrid":"/items/garnet","dropRate":0.1333,"minCount":1,"maxCount":3},{"itemHrid":"/items/jade","dropRate":0.1333,"minCount":1,"maxCount":3},{"itemHrid":"/items/amethyst","dropRate":0.1333,"minCount":1,"maxCount":3},{"itemHrid":"/items/moonstone","dropRate":0.1333,"minCount":1,"maxCount":2}],"/items/large_meteorite_cache":[{"itemHrid":"/items/coin","dropRate":1,"minCount":30000,"maxCount":60000},{"itemHrid":"/items/coin","dropRate":0.1,"minCount":150000,"maxCount":300000},{"itemHrid":"/items/cowbell","dropRate":0.1,"minCount":5,"maxCount":10},{"itemHrid":"/items/cowbell","dropRate":0.01,"minCount":40,"maxCount":80},{"itemHrid":"/items/star_fragment","dropRate":1,"minCount":30,"maxCount":60},{"itemHrid":"/items/star_fragment","dropRate":0.1,"minCount":150,"maxCount":300}],"/items/large_treasure_chest":[{"itemHrid":"/items/coin","dropRate":1,"minCount":30000,"maxCount":60000},{"itemHrid":"/items/coin","dropRate":0.1,"minCount":150000,"maxCount":300000},{"itemHrid":"/items/cowbell","dropRate":0.1,"minCount":5,"maxCount":10},{"itemHrid":"/items/cowbell","dropRate":0.01,"minCount":40,"maxCount":80},{"itemHrid":"/items/pearl","dropRate":0.6,"minCount":1,"maxCount":3},{"itemHrid":"/items/amber","dropRate":0.4,"minCount":1,"maxCount":3},{"itemHrid":"/items/garnet","dropRate":0.4,"minCount":1,"maxCount":3},{"itemHrid":"/items/jade","dropRate":0.4,"minCount":1,"maxCount":3},{"itemHrid":"/items/amethyst","dropRate":0.4,"minCount":1,"maxCount":3},{"itemHrid":"/items/moonstone","dropRate":0.4,"minCount":1,"maxCount":2}],"/items/medium_artisans_crate":[{"itemHrid":"/items/coin","dropRate":1,"minCount":12000,"maxCount":24000},{"itemHrid":"/items/coin","dropRate":0.1,"minCount":60000,"maxCount":120000},{"itemHrid":"/items/cowbell","dropRate":0.1,"minCount":3,"maxCount":5},{"itemHrid":"/items/cowbell","dropRate":0.01,"minCount":20,"maxCount":40},{"itemHrid":"/items/shard_of_protection","dropRate":1,"minCount":2,"maxCount":5},{"itemHrid":"/items/shard_of_protection","dropRate":0.05,"minCount":10,"maxCount":25},{"itemHrid":"/items/pearl","dropRate":0.2,"minCount":1,"maxCount":2},{"itemHrid":"/items/amber","dropRate":0.1333,"minCount":1,"maxCount":2},{"itemHrid":"/items/garnet","dropRate":0.1,"minCount":1,"maxCount":2},{"itemHrid":"/items/jade","dropRate":0.1,"minCount":1,"maxCount":2},{"itemHrid":"/items/amethyst","dropRate":0.1,"minCount":1,"maxCount":2},{"itemHrid":"/items/moonstone","dropRate":0.05,"minCount":1,"maxCount":1}],"/items/medium_meteorite_cache":[{"itemHrid":"/items/coin","dropRate":1,"minCount":12000,"maxCount":24000},{"itemHrid":"/items/coin","dropRate":0.1,"minCount":60000,"maxCount":120000},{"itemHrid":"/items/cowbell","dropRate":0.1,"minCount":3,"maxCount":5},{"itemHrid":"/items/cowbell","dropRate":0.01,"minCount":20,"maxCount":40},{"itemHrid":"/items/star_fragment","dropRate":1,"minCount":12,"maxCount":24},{"itemHrid":"/items/star_fragment","dropRate":0.1,"minCount":60,"maxCount":120}],"/items/medium_treasure_chest":[{"itemHrid":"/items/coin","dropRate":1,"minCount":12000,"maxCount":24000},{"itemHrid":"/items/coin","dropRate":0.1,"minCount":60000,"maxCount":120000},{"itemHrid":"/items/cowbell","dropRate":0.1,"minCount":3,"maxCount":5},{"itemHrid":"/items/cowbell","dropRate":0.01,"minCount":20,"maxCount":40},{"itemHrid":"/items/pearl","dropRate":0.6,"minCount":1,"maxCount":2},{"itemHrid":"/items/amber","dropRate":0.4,"minCount":1,"maxCount":2},{"itemHrid":"/items/garnet","dropRate":0.3,"minCount":1,"maxCount":2},{"itemHrid":"/items/jade","dropRate":0.3,"minCount":1,"maxCount":2},{"itemHrid":"/items/amethyst","dropRate":0.3,"minCount":1,"maxCount":2},{"itemHrid":"/items/moonstone","dropRate":0.15,"minCount":1,"maxCount":1}],"/items/pirate_chest":[{"itemHrid":"/items/pirate_essence","dropRate":1,"minCount":400,"maxCount":800},{"itemHrid":"/items/pirate_essence","dropRate":0.05,"minCount":2000,"maxCount":4000},{"itemHrid":"/items/pirate_token","dropRate":1,"minCount":250,"maxCount":500},{"itemHrid":"/items/pirate_token","dropRate":0.05,"minCount":1500,"maxCount":3000},{"itemHrid":"/items/large_treasure_chest","dropRate":0.3,"minCount":1,"maxCount":8},{"itemHrid":"/items/moonstone","dropRate":0.5,"minCount":5,"maxCount":20},{"itemHrid":"/items/sunstone","dropRate":0.5,"minCount":1,"maxCount":6},{"itemHrid":"/items/shield_bash","dropRate":0.5,"minCount":1,"maxCount":2},{"itemHrid":"/items/fracturing_impact","dropRate":0.5,"minCount":1,"maxCount":2},{"itemHrid":"/items/life_drain","dropRate":0.5,"minCount":1,"maxCount":2},{"itemHrid":"/items/marksman_brooch","dropRate":0.03,"minCount":1,"maxCount":1},{"itemHrid":"/items/corsair_crest","dropRate":0.03,"minCount":1,"maxCount":1},{"itemHrid":"/items/damaged_anchor","dropRate":0.03,"minCount":1,"maxCount":1},{"itemHrid":"/items/maelstrom_plating","dropRate":0.03,"minCount":1,"maxCount":1},{"itemHrid":"/items/kraken_leather","dropRate":0.03,"minCount":1,"maxCount":1},{"itemHrid":"/items/kraken_fang","dropRate":0.03,"minCount":1,"maxCount":1},{"itemHrid":"/items/pirate_chest_key","dropRate":0.02,"minCount":1,"maxCount":1},{"itemHrid":"/items/marksman_bracers","dropRate":0.002,"minCount":1,"maxCount":1},{"itemHrid":"/items/corsair_helmet","dropRate":0.002,"minCount":1,"maxCount":1},{"itemHrid":"/items/anchorbound_plate_body","dropRate":0.0004,"minCount":1,"maxCount":1},{"itemHrid":"/items/anchorbound_plate_legs","dropRate":0.0004,"minCount":1,"maxCount":1},{"itemHrid":"/items/maelstrom_plate_body","dropRate":0.0004,"minCount":1,"maxCount":1},{"itemHrid":"/items/maelstrom_plate_legs","dropRate":0.0004,"minCount":1,"maxCount":1},{"itemHrid":"/items/kraken_tunic","dropRate":0.0004,"minCount":1,"maxCount":1},{"itemHrid":"/items/kraken_chaps","dropRate":0.0004,"minCount":1,"maxCount":1},{"itemHrid":"/items/rippling_trident","dropRate":0.0003,"minCount":1,"maxCount":1},{"itemHrid":"/items/blooming_trident","dropRate":0.0003,"minCount":1,"maxCount":1},{"itemHrid":"/items/blazing_trident","dropRate":0.0003,"minCount":1,"maxCount":1}],"/items/pirate_refinement_chest":[{"itemHrid":"/items/pirate_refinement_shard","dropRate":1,"minCount":1,"maxCount":2},{"itemHrid":"/items/pirate_refinement_shard","dropRate":0.05,"minCount":5,"maxCount":10}],"/items/purdoras_box_combat":[{"itemHrid":"/items/labyrinth_essence","dropRate":1,"minCount":40,"maxCount":80},{"itemHrid":"/items/labyrinth_essence","dropRate":0.05,"minCount":200,"maxCount":400},{"itemHrid":"/items/labyrinth_token","dropRate":0.1,"minCount":10,"maxCount":25},{"itemHrid":"/items/seal_of_combat_drop","dropRate":0.1,"minCount":1,"maxCount":2},{"itemHrid":"/items/seal_of_attack_speed","dropRate":0.1,"minCount":1,"maxCount":2},{"itemHrid":"/items/seal_of_cast_speed","dropRate":0.1,"minCount":1,"maxCount":2},{"itemHrid":"/items/seal_of_damage","dropRate":0.1,"minCount":1,"maxCount":2},{"itemHrid":"/items/seal_of_critical_rate","dropRate":0.1,"minCount":1,"maxCount":2},{"itemHrid":"/items/seal_of_wisdom","dropRate":0.05,"minCount":1,"maxCount":2},{"itemHrid":"/items/seal_of_rare_find","dropRate":0.05,"minCount":1,"maxCount":2},{"itemHrid":"/items/pathbreaker_lodestone","dropRate":0.01,"minCount":1,"maxCount":1},{"itemHrid":"/items/pathfinder_lodestone","dropRate":0.01,"minCount":1,"maxCount":1},{"itemHrid":"/items/pathseeker_lodestone","dropRate":0.01,"minCount":1,"maxCount":1}],"/items/purdoras_box_skilling":[{"itemHrid":"/items/labyrinth_essence","dropRate":1,"minCount":40,"maxCount":80},{"itemHrid":"/items/labyrinth_essence","dropRate":0.05,"minCount":200,"maxCount":400},{"itemHrid":"/items/labyrinth_token","dropRate":0.1,"minCount":10,"maxCount":25},{"itemHrid":"/items/seal_of_gathering","dropRate":0.1,"minCount":1,"maxCount":2},{"itemHrid":"/items/seal_of_gourmet","dropRate":0.1,"minCount":1,"maxCount":2},{"itemHrid":"/items/seal_of_processing","dropRate":0.1,"minCount":1,"maxCount":2},{"itemHrid":"/items/seal_of_efficiency","dropRate":0.1,"minCount":1,"maxCount":2},{"itemHrid":"/items/seal_of_action_speed","dropRate":0.1,"minCount":1,"maxCount":2},{"itemHrid":"/items/seal_of_wisdom","dropRate":0.05,"minCount":1,"maxCount":2},{"itemHrid":"/items/seal_of_rare_find","dropRate":0.05,"minCount":1,"maxCount":2},{"itemHrid":"/items/gatherer_cape","dropRate":0.002,"minCount":1,"maxCount":1},{"itemHrid":"/items/artificer_cape","dropRate":0.002,"minCount":1,"maxCount":1},{"itemHrid":"/items/culinary_cape","dropRate":0.002,"minCount":1,"maxCount":1},{"itemHrid":"/items/chance_cape","dropRate":0.002,"minCount":1,"maxCount":1}],"/items/purples_gift":[{"itemHrid":"/items/coin","dropRate":1,"minCount":30000,"maxCount":60000},{"itemHrid":"/items/coin","dropRate":0.1,"minCount":150000,"maxCount":300000},{"itemHrid":"/items/task_token","dropRate":1,"minCount":5,"maxCount":10},{"itemHrid":"/items/task_token","dropRate":0.1,"minCount":25,"maxCount":50},{"itemHrid":"/items/task_crystal","dropRate":0.1,"minCount":1,"maxCount":1},{"itemHrid":"/items/small_meteorite_cache","dropRate":1,"minCount":1,"maxCount":1},{"itemHrid":"/items/small_artisans_crate","dropRate":1,"minCount":1,"maxCount":1},{"itemHrid":"/items/small_treasure_chest","dropRate":1,"minCount":1,"maxCount":1},{"itemHrid":"/items/medium_meteorite_cache","dropRate":0.3,"minCount":1,"maxCount":1},{"itemHrid":"/items/medium_artisans_crate","dropRate":0.3,"minCount":1,"maxCount":1},{"itemHrid":"/items/medium_treasure_chest","dropRate":0.3,"minCount":1,"maxCount":1},{"itemHrid":"/items/large_meteorite_cache","dropRate":0.1,"minCount":1,"maxCount":1},{"itemHrid":"/items/large_artisans_crate","dropRate":0.1,"minCount":1,"maxCount":1},{"itemHrid":"/items/large_treasure_chest","dropRate":0.1,"minCount":1,"maxCount":1},{"itemHrid":"/items/purples_gift","dropRate":0.02,"minCount":1,"maxCount":1}],"/items/sinister_chest":[{"itemHrid":"/items/sinister_essence","dropRate":1,"minCount":400,"maxCount":800},{"itemHrid":"/items/sinister_essence","dropRate":0.05,"minCount":2000,"maxCount":4000},{"itemHrid":"/items/sinister_token","dropRate":1,"minCount":250,"maxCount":500},{"itemHrid":"/items/sinister_token","dropRate":0.05,"minCount":1500,"maxCount":3000},{"itemHrid":"/items/large_treasure_chest","dropRate":0.3,"minCount":1,"maxCount":6},{"itemHrid":"/items/garnet","dropRate":0.6,"minCount":5,"maxCount":20},{"itemHrid":"/items/sunstone","dropRate":0.5,"minCount":1,"maxCount":3},{"itemHrid":"/items/penetrating_strike","dropRate":0.5,"minCount":1,"maxCount":2},{"itemHrid":"/items/pestilent_shot","dropRate":0.5,"minCount":1,"maxCount":2},{"itemHrid":"/items/smoke_burst","dropRate":0.5,"minCount":1,"maxCount":2},{"itemHrid":"/items/acrobats_ribbon","dropRate":0.04,"minCount":1,"maxCount":1},{"itemHrid":"/items/magicians_cloth","dropRate":0.04,"minCount":1,"maxCount":1},{"itemHrid":"/items/chaotic_chain","dropRate":0.02,"minCount":1,"maxCount":1},{"itemHrid":"/items/cursed_ball","dropRate":0.02,"minCount":1,"maxCount":1},{"itemHrid":"/items/sinister_chest_key","dropRate":0.02,"minCount":1,"maxCount":1},{"itemHrid":"/items/sinister_cape","dropRate":0.04,"minCount":1,"maxCount":1},{"itemHrid":"/items/acrobatic_hood","dropRate":0.002,"minCount":1,"maxCount":1},{"itemHrid":"/items/magicians_hat","dropRate":0.002,"minCount":1,"maxCount":1},{"itemHrid":"/items/chaotic_flail","dropRate":0.0005,"minCount":1,"maxCount":1},{"itemHrid":"/items/cursed_bow","dropRate":0.0005,"minCount":1,"maxCount":1}],"/items/sinister_refinement_chest":[{"itemHrid":"/items/sinister_refinement_shard","dropRate":1,"minCount":1,"maxCount":2},{"itemHrid":"/items/sinister_refinement_shard","dropRate":0.05,"minCount":5,"maxCount":10}],"/items/small_artisans_crate":[{"itemHrid":"/items/coin","dropRate":1,"minCount":5000,"maxCount":10000},{"itemHrid":"/items/coin","dropRate":0.1,"minCount":25000,"maxCount":50000},{"itemHrid":"/items/cowbell","dropRate":0.1,"minCount":1,"maxCount":2},{"itemHrid":"/items/cowbell","dropRate":0.01,"minCount":8,"maxCount":15},{"itemHrid":"/items/shard_of_protection","dropRate":1,"minCount":1,"maxCount":2},{"itemHrid":"/items/shard_of_protection","dropRate":0.05,"minCount":5,"maxCount":10},{"itemHrid":"/items/pearl","dropRate":0.2,"minCount":1,"maxCount":1},{"itemHrid":"/items/amber","dropRate":0.1333,"minCount":1,"maxCount":1},{"itemHrid":"/items/garnet","dropRate":0.05,"minCount":1,"maxCount":1},{"itemHrid":"/items/jade","dropRate":0.05,"minCount":1,"maxCount":1},{"itemHrid":"/items/amethyst","dropRate":0.05,"minCount":1,"maxCount":1}],"/items/small_meteorite_cache":[{"itemHrid":"/items/coin","dropRate":1,"minCount":5000,"maxCount":10000},{"itemHrid":"/items/coin","dropRate":0.1,"minCount":25000,"maxCount":50000},{"itemHrid":"/items/cowbell","dropRate":0.1,"minCount":1,"maxCount":2},{"itemHrid":"/items/cowbell","dropRate":0.01,"minCount":8,"maxCount":15},{"itemHrid":"/items/star_fragment","dropRate":1,"minCount":5,"maxCount":10},{"itemHrid":"/items/star_fragment","dropRate":0.1,"minCount":25,"maxCount":50}],"/items/small_treasure_chest":[{"itemHrid":"/items/coin","dropRate":1,"minCount":5000,"maxCount":10000},{"itemHrid":"/items/coin","dropRate":0.1,"minCount":25000,"maxCount":50000},{"itemHrid":"/items/cowbell","dropRate":0.1,"minCount":1,"maxCount":2},{"itemHrid":"/items/cowbell","dropRate":0.01,"minCount":8,"maxCount":15},{"itemHrid":"/items/pearl","dropRate":0.6,"minCount":1,"maxCount":1},{"itemHrid":"/items/amber","dropRate":0.4,"minCount":1,"maxCount":1},{"itemHrid":"/items/garnet","dropRate":0.15,"minCount":1,"maxCount":1},{"itemHrid":"/items/jade","dropRate":0.15,"minCount":1,"maxCount":1},{"itemHrid":"/items/amethyst","dropRate":0.15,"minCount":1,"maxCount":1}]}');
 
+/***/ }),
+
+/***/ "./src/combatsimulator/data/shrineDetailMap.json":
+/*!*******************************************************!*\
+  !*** ./src/combatsimulator/data/shrineDetailMap.json ***!
+  \*******************************************************/
+/***/ ((module) => {
+
+module.exports = /*#__PURE__*/JSON.parse('{"/shrines/power":{"hrid":"/shrines/power","name":"Power Shrine","sortIndex":1,"buffs":[{"uniqueHrid":"/buff_uniques/shrine_power_damage","typeHrid":"/buff_types/damage","ratioBoost":0.003,"ratioBoostLevelBonus":0.003,"flatBoost":0,"flatBoostLevelBonus":0,"startTime":"0001-01-01T00:00:00Z","duration":0}]},"/shrines/rhythm":{"hrid":"/shrines/rhythm","name":"Rhythm Shrine","sortIndex":2,"buffs":[{"uniqueHrid":"/buff_uniques/shrine_rhythm_attack_speed","typeHrid":"/buff_types/attack_speed","ratioBoost":0.004,"ratioBoostLevelBonus":0.004,"flatBoost":0,"flatBoostLevelBonus":0,"startTime":"0001-01-01T00:00:00Z","duration":0},{"uniqueHrid":"/buff_uniques/shrine_rhythm_cast_speed","typeHrid":"/buff_types/cast_speed","ratioBoost":0,"ratioBoostLevelBonus":0,"flatBoost":0.004,"flatBoostLevelBonus":0.004,"startTime":"0001-01-01T00:00:00Z","duration":0}]},"/shrines/spirit":{"hrid":"/shrines/spirit","name":"Spirit Shrine","sortIndex":3,"buffs":[{"uniqueHrid":"/buff_uniques/shrine_spirit_max_hitpoints","typeHrid":"/buff_types/max_hitpoints","ratioBoost":0.01,"ratioBoostLevelBonus":0.01,"flatBoost":0,"flatBoostLevelBonus":0,"startTime":"0001-01-01T00:00:00Z","duration":0},{"uniqueHrid":"/buff_uniques/shrine_spirit_max_manapoints","typeHrid":"/buff_types/max_manapoints","ratioBoost":0.01,"ratioBoostLevelBonus":0.01,"flatBoost":0,"flatBoostLevelBonus":0,"startTime":"0001-01-01T00:00:00Z","duration":0}]},"/shrines/rare":{"hrid":"/shrines/rare","name":"Rare Shrine","sortIndex":4,"buffs":[{"uniqueHrid":"/buff_uniques/shrine_rare_rare_find","typeHrid":"/buff_types/rare_find","ratioBoost":0,"ratioBoostLevelBonus":0,"flatBoost":0.015,"flatBoostLevelBonus":0.015,"startTime":"0001-01-01T00:00:00Z","duration":0}]},"/shrines/scholar":{"hrid":"/shrines/scholar","name":"Scholar Shrine","sortIndex":5,"buffs":[{"uniqueHrid":"/buff_uniques/shrine_scholar_wisdom","typeHrid":"/buff_types/wisdom","ratioBoost":0,"ratioBoostLevelBonus":0,"flatBoost":0.005,"flatBoostLevelBonus":0.005,"startTime":"0001-01-01T00:00:00Z","duration":0}]}}');
+
 /***/ })
 
 /******/ 	});
@@ -1841,7 +1909,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _combatsimulator_data_openableLootDropMap_json__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./combatsimulator/data/openableLootDropMap.json */ "./src/combatsimulator/data/openableLootDropMap.json");
 /* harmony import */ var _combatsimulator_data_achievementTierDetailMap_json__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./combatsimulator/data/achievementTierDetailMap.json */ "./src/combatsimulator/data/achievementTierDetailMap.json");
 /* harmony import */ var _combatsimulator_data_achievementDetailMap_json__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./combatsimulator/data/achievementDetailMap.json */ "./src/combatsimulator/data/achievementDetailMap.json");
-/* harmony import */ var _patchNote_json__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ../patchNote.json */ "./patchNote.json");
+/* harmony import */ var _combatsimulator_data_shrineDetailMap_json__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./combatsimulator/data/shrineDetailMap.json */ "./src/combatsimulator/data/shrineDetailMap.json");
+/* harmony import */ var _patchNote_json__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ../patchNote.json */ "./patchNote.json");
+
 
 
 
@@ -2030,6 +2100,52 @@ function createHouseInput(hrid) {
     levelInput.max = 8;
     levelInput.step = 1;
     levelInput.dataset.houseHrid = hrid;
+
+    return levelInput;
+}
+
+function initShrinesModal() {
+    let shrinesList = document.getElementById("shrinesList");
+    let newChildren = [];
+    let shrines = Object.values(_combatsimulator_data_shrineDetailMap_json__WEBPACK_IMPORTED_MODULE_19__).sort((a, b) => a.sortIndex - b.sortIndex);
+    player.shrines = {};
+
+    for (const shrine of Object.values(shrines)) {
+        player.shrines[shrine.hrid] = 0;
+
+        let row = createElement("div", "row mb-2");
+
+        let nameCol = createElement("div", "col-md-4 offset-md-3 align-self-center", shrine.name);
+        nameCol.setAttribute("data-i18n", "shrineNames." + shrine.hrid);
+        row.appendChild(nameCol);
+
+        let levelCol = createElement("div", "col-md-2");
+        let levelInput = createShrineInput(shrine.hrid);
+
+        levelInput.addEventListener("input", function (e) {
+            let inputValue = e.target.value;
+            const hrid = e.target.dataset.shrineHrid;
+            player.shrines[hrid] = parseInt(inputValue);
+        });
+
+        levelCol.appendChild(levelInput);
+        row.appendChild(levelCol);
+
+        newChildren.push(row);
+    }
+
+    shrinesList.replaceChildren(...newChildren);
+}
+
+function createShrineInput(hrid) {
+    let levelInput = document.createElement("input");
+    levelInput.className = "form-control";
+    levelInput.type = "number";
+    levelInput.placeholder = 0;
+    levelInput.min = 0;
+    levelInput.max = 8;
+    levelInput.step = 1;
+    levelInput.dataset.shrineHrid = hrid;
 
     return levelInput;
 }
@@ -5046,6 +5162,7 @@ function parsePlayerJson(playerJson, hrid) {
         abilities: [],
         ...playerJson.player,
         houseRooms: playerJson.houseRooms,
+        shrines: playerJson.shrines,
     };
     playerData.equipment = {};
     const triggerMap = playerJson.triggerMap;
@@ -5079,6 +5196,7 @@ function parsePlayerJson(playerJson, hrid) {
     player.updateCombatDetails();
     player.houseRooms = playerJson.houseRooms;
     player.achievements = playerJson.achievements ?? {};
+    player.shrines = playerJson.shrines ?? {};
     return player;
 }
 // read JSON file to simulate
@@ -5599,6 +5717,7 @@ function getEquipmentSetFromUI() {
         triggerMap: {},
         houseRooms: {},
         achievements: {},
+        shrines: {},
     };
 
     ["stamina", "intelligence", "attack", "melee", "defense", "ranged", "magic"].forEach((skill) => {
@@ -5639,6 +5758,7 @@ function getEquipmentSetFromUI() {
 
     equipmentSet.houseRooms = player.houseRooms;
     equipmentSet.achievements = player.achievements;
+    equipmentSet.shrines = player.shrines;
 
     return equipmentSet;
 }
@@ -5744,6 +5864,25 @@ function loadEquipmentSetIntoUI(equipmentSet) {
             const field = document.querySelector('[data-house-hrid="' + room.hrid + '"]');
             field.value = '';
             player.houseRooms[room.hrid] = 0;
+        }
+    }
+
+    if (equipmentSet.shrines) {
+        for (const shrine in equipmentSet.shrines) {
+            const field = document.querySelector('[data-shrine-hrid="' + shrine + '"]');
+            if (equipmentSet.shrines[shrine]) {
+                field.value = equipmentSet.shrines[shrine];
+            } else {
+                field.value = '';
+            }
+        }
+        player.shrines = equipmentSet.shrines;
+    } else {
+        let shrines = Object.values(_combatsimulator_data_shrineDetailMap_json__WEBPACK_IMPORTED_MODULE_19__);
+        for (const shrine of Object.values(shrines)) {
+            const field = document.querySelector('[data-shrine-hrid="' + shrine.hrid + '"]');
+            field.value = '';
+            player.shrines[shrine.hrid] = 0;
         }
     }
 
@@ -5880,7 +6019,8 @@ function doSoloExport() {
         zone: zoneSelect.value,
         simulationTime: simulationTimeInput.value,
         houseRooms: player.houseRooms,
-        achievements: player.achievements
+        achievements: player.achievements,
+        shrines: player.shrines
     };
     try {
         navigator.clipboard.writeText(JSON.stringify(state)).then(() => alert("Current set has been copied to clipboard."));
@@ -6031,6 +6171,25 @@ function doSoloImport() {
         }
     }
 
+    if (importSet.shrines) {
+        for (const shrine in importSet.shrines) {
+            const field = document.querySelector('[data-shrine-hrid="' + shrine + '"]');
+            if (importSet.shrines[shrine]) {
+                field.value = importSet.shrines[shrine];
+            } else {
+                field.value = '';
+            }
+        }
+        player.shrines = importSet.shrines;
+    } else {
+        let shrines = Object.values(_combatsimulator_data_shrineDetailMap_json__WEBPACK_IMPORTED_MODULE_19__);
+        for (const shrine of Object.values(shrines)) {
+            const field = document.querySelector('[data-shrine-hrid="' + shrine.hrid + '"]');
+            field.value = '';
+            player.shrines[shrine.hrid] = 0;
+        }
+    }
+
     if (importSet.achievements) {
         for (const achievement in importSet.achievements) {
             const field = document.querySelector('[data-achievement-hrid="' + achievement + '"]');
@@ -6109,7 +6268,8 @@ function savePreviousPlayer(playerId) {
         zone: zoneSelect.value,
         simulationTime: simulationTimeInput.value,
         houseRooms: player.houseRooms,
-        achievements: player.achievements
+        achievements: player.achievements,
+        shrines: player.shrines
     };
     try {
         playerDataMap[playerId] = JSON.stringify(state);
@@ -6229,6 +6389,26 @@ function updateNextPlayer(currentPlayerNumber) {
             }
         }
         player.houseRooms = importSet.houseRooms;
+    }
+
+    { // reset all shrines
+        let shrines = Object.values(_combatsimulator_data_shrineDetailMap_json__WEBPACK_IMPORTED_MODULE_19__);
+        for (const shrine of Object.values(shrines)) {
+            const field = document.querySelector('[data-shrine-hrid="' + shrine.hrid + '"]');
+            field.value = '';
+            player.shrines[shrine.hrid] = 0;
+        }
+    }
+    if (importSet.shrines) {
+        for (const shrine in importSet.shrines) {
+            const field = document.querySelector('[data-shrine-hrid="' + shrine + '"]');
+            if (importSet.shrines[shrine]) {
+                field.value = importSet.shrines[shrine];
+            } else {
+                field.value = '';
+            }
+        }
+        player.shrines = importSet.shrines;
     }
 
     { // reset all achievements
@@ -6472,14 +6652,14 @@ function updateTable(tableId, item, price) {
 
 function initPatchNotes() {
     const patchNotesRows = document.getElementById("patchNotes");
-    for (const pn in _patchNote_json__WEBPACK_IMPORTED_MODULE_19__) {
+    for (const pn in _patchNote_json__WEBPACK_IMPORTED_MODULE_20__) {
         const patchNoteContainer = document.createElement("div");
         patchNotesRows.setAttribute('class', 'col-12 mb-4');
 
         const patchNoteElement = document.createElement("h6");
         patchNoteElement.innerHTML = pn;
         const patchNoteList = document.createElement("ul");
-        for (const note of _patchNote_json__WEBPACK_IMPORTED_MODULE_19__[pn]) {
+        for (const note of _patchNote_json__WEBPACK_IMPORTED_MODULE_20__[pn]) {
             const noteElement = document.createElement("li");
             noteElement.innerHTML = note;
             patchNoteList.appendChild(noteElement);
@@ -6657,6 +6837,7 @@ function updateContent() {
 
 initEquipmentSection();
 initHouseRoomsModal();
+initShrinesModal();
 initAchievementsModal();
 initLevelSection();
 initFoodSection();

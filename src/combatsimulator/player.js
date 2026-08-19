@@ -4,6 +4,7 @@ import Consumable from "./consumable";
 import Equipment from "./equipment";
 import HouseRoom from "./houseRoom";
 import Achievement from "./achievement";
+import Shrine from "./shrine";
 
 class Player extends CombatUnit {
     equipment = {
@@ -49,6 +50,12 @@ class Player extends CombatUnit {
         Object.entries(dto.houseRooms).forEach(houseRoom => {
             if (houseRoom[1] > 0) {
                 player.houseRooms.push(new HouseRoom(houseRoom[0], houseRoom[1]))
+            }
+        });
+
+        Object.entries(dto.shrines ?? {}).forEach(shrine => {
+            if (shrine[1] > 0) {
+                player.shrines.push(new Shrine(shrine[0], shrine[1]))
             }
         });
 
