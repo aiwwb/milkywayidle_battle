@@ -87,9 +87,29 @@ index.html + src/main.js        UI 主线程：收集表单 → postMessage 给 
 - 价格由 `fetchPrices()`（`main.js:4555`）从 `https://www.milkywayidle.com/game_data/marketplace.json` 拉取，存 `window.prices = {ask, bid, vendor}`。
 - **税率 2%** 只写在 `js/i18n.js` 的 `marketplaceContent` 文案里（中英文都是 2%），是游戏规则说明；**收益计算代码本身没有扣税**。若二开要扣税，需在 `showDrops` / `showConsumablesUsed` 的 `price * amount` 处加系数。
 
+## 发布与部署（GitHub Pages）
+
+项目发布到 GitHub Pages，地址 `https://aiwwb.github.io/milkywayidle_battle/dist/`（发布 `dist/` 静态文件）。
+
+- **发布前先 `npm run build` 并提交 `dist/`** —— dist 被 git 追踪，Pages 发布的就是它。
+- Pages 配置：仓库 Settings → Pages → Source 选 `Deploy from a branch` → Branch 选 `testing`、目录选 `/ (root)`（**不是 /docs**）。
+- webpack 未设 `publicPath`（默认 auto），配合 `index.html` 相对路径引用，所以能直接跑在 `/dist/` 子路径下，无需改 base。
+- remote 指向自有仓库 `https://github.com/aiwwb/milkywayidle_battle.git`。
+
+### git 代理（坑）
+
+本机走 v2rayN 代理（mixed 端口 10808，http/socks5 同端口）。`git push` 若报 `ServicePointManager 不支持具有 socks5h 方案的代理`，是 Git Credential Manager（GCM）不支持 socks5h 协议导致。
+
+- 排查：`git config --list --show-origin | grep proxy`，注意 **local `.git/config` 会覆盖 global**。
+- 解决：把代理协议改成 http，GCM 才能用。本项目已在 `.git/config` 配 `http.proxy = http://127.0.0.1:10808`（仅 local，不影响其他仓库）。
+
 ## 二开提示
 
 - 改**战斗数值/机制** → 动 `src/combatsimulator/`，改完 `npm run build` 后刷新页面即可。
 - 改**UI / 表单 / 结果展示** → 动 `index.html` 和 `src/main.js`。
 - 新增**怪物 / 装备 / 技能数据** → 先看 `src/combatsimulator/data/` 里对应 JSON 的结构，再按相同 schema 增补；worker 和主线程都会 `import` 这些 JSON（webpack 打包进 bundle）。
 - 涉及多线程：主线程和 worker 之间只传可序列化的 DTO（用 `structuredClone` 拷贝），不要传函数/类实例。
+
+## 协作约定
+
+- 代码改动由 Claude 完成并 commit；**push 不由 Claude 执行**，而是由 Claude 给出 `git push` 命令，用户手动执行（push 涉及本机认证/代理，用户手动点授权更稳妥）。
