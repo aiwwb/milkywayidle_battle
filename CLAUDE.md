@@ -103,6 +103,12 @@ index.html + src/main.js        UI 主线程：收集表单 → postMessage 给 
 - 排查：`git config --list --show-origin | grep proxy`，注意 **local `.git/config` 会覆盖 global**。
 - 解决：把代理协议改成 http，GCM 才能用。本项目已在 `.git/config` 配 `http.proxy = http://127.0.0.1:10808`（仅 local，不影响其他仓库）。
 
+## 第三方集成
+
+- **访问量统计（不蒜子 busuanzi）**：`index.html` 引入 `busuanzi.js`，`<footer>` 里用 `#busuanzi_value_site_pv` / `#busuanzi_value_site_uv` 显示站点总访问量 / 访客数。
+  - 统计粒度按**域名**（整个 `aiwwb.github.io`），不是按仓库——若以后在同域名下新增 Pages 项目会共享计数器。
+  - 从接入时才开始统计（无历史数据）；服务偶发不稳定，加载失败时 footer 那行保持隐藏。
+
 ## 二开提示
 
 - 改**战斗数值/机制** → 动 `src/combatsimulator/`，改完 `npm run build` 后刷新页面即可。
