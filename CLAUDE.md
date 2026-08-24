@@ -83,9 +83,13 @@ index.html + src/main.js        UI 主线程：收集表单 → postMessage 给 
 
 ## 收益计算与税率
 
-- 收益 = Σ(掉落数量 × 单价)，单价三种来源（`main.js` `showDrops`）：`bid`（BO 买价，掉落默认）/ `ask`（SO 卖价）/ `vendor`（NPC 回收价 = `itemDetailMap[item].sellPrice`）。
-- 价格由 `fetchPrices()`（`main.js:4555`）从 `https://www.milkywayidle.com/game_data/marketplace.json` 拉取，存 `window.prices = {ask, bid, vendor}`。
-- **税率 2%** 只写在 `js/i18n.js` 的 `marketplaceContent` 文案里（中英文都是 2%），是游戏规则说明；**收益计算代码本身没有扣税**。若二开要扣税，需在 `showDrops` / `showConsumablesUsed` 的 `price * amount` 处加系数。
+- 收益 = Σ(掉落数量 × 单价)，单价三种来源（`main.js` `resolveItemPrice`，原 `showDrops` 处的重复取价代码已抽成此函数）：`bid`（BO 买价，掉落默认）/ `ask`（SO 卖价）/ `vendor`（NPC 回收价 = `itemDetailMap[item].sellPrice`）。
+- 价格由 `fetchPrices()` 从 `https://www.milkywayidle.com/game_data/marketplace.json` 拉取，存 `window.prices = {ask, bid, vendor}`。
+- **市场税 5%**：`main.js` 顶部 `MARKET_TAX_RATE = 0.05`（改税率只动这一个常量，注释在常量处）。收益展示分两层：
+  - 税前数字（利润/期望利润）保持不变；
+  - 新增"税后期望利润"= 税后期望收入 − 支出，显示在结果页"期望利润"下方和改价弹窗里（i18n key `common:afterTaxNoRNGProfit`）。
+- **免税规则**（`getTaxFactor()`）：① 直接掉落的金币 `/items/coin`；② 按 vendor 回收价成交的；③ 地下城（`isDungeon`）和迷宫（`isLabyrinth`）产出。其余按市场单价 × (1 - MARKET_TAX_RATE)。
+- 计算点共 3 处（都已接入）：`getDropProfit`（汇总表）、`showKills`（改价弹窗两张收益表，每行 `<tr data-tax-factor>` 记录税后系数）、手动改价的 input 监听（按行系数重算税后总额）。
 
 ## 发布与部署（GitHub Pages）
 

@@ -37,6 +37,7 @@
     "total": "Total",
     "profit": "Profit",
     "noRNGProfit": "No RNG Profit",
+    "afterTaxNoRNGProfit": "After-Tax Expected Profit",
     "expense": "Expense",
     "revenue": "Revenue",
     "noRNGRevenue": "No RNG Revenue",

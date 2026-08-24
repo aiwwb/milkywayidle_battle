@@ -1939,6 +1939,20 @@ window.noRngRevenue = 0;
 window.expenses = 0;
 window.profit = 0;
 window.noRngProfit = 0;
+window.noRngRevenueAfterTax = 0; // 税后期望收入（见下方税率设置说明）
+
+// ===================== 市场税率设置（要改税率只动这里） =====================
+// 游戏里通过市场（marketplace）出售物品要收 5% 税。
+// MARKET_TAX_RATE 就是税率：0.05 = 5%，0.02 = 2%，0 = 完全不算税。
+// 实际到手金额 = 单价 × (1 - MARKET_TAX_RATE)，例如 5% 税即单价 × 0.95。
+const MARKET_TAX_RATE = 0.05;
+// 金币的 itemHrid：怪物直接掉落的金币不经过市场，不收税
+const COIN_HRID = "/items/coin";
+// 免税规则汇总（见下方 getTaxFactor 函数）：
+//   1. 直接掉落的金币（COIN_HRID）不收税
+//   2. 按 NPC 回收价（vendor）成交的不收市场税
+//   3. 地下城（isDungeon）和迷宫（isLabyrinth）的产出不收税
+// ==========================================================================
 
 // #region Worker
 
@@ -3297,6 +3311,10 @@ function showSimulationResult(simResult) {
     window.noRngProfit = window.noRngRevenue - window.expenses;
     document.getElementById('noRngProfitSpan').innerText = window.noRngProfit.toLocaleString();
     document.getElementById('noRngProfitPreview').innerText = window.noRngProfit.toLocaleString();
+    // 税后收益/利润（金币、vendor 价、地下城、迷宫免税，其余按 MARKET_TAX_RATE 扣税）
+    window.noRngAfterTaxProfit = window.noRngRevenueAfterTax - window.expenses;
+    document.getElementById('noRngAfterTaxProfitSpan').innerText = window.noRngAfterTaxProfit.toLocaleString();
+    document.getElementById('noRngAfterTaxProfitPreview').innerText = window.noRngAfterTaxProfit.toLocaleString();
     
     // 显示战斗图表
     if (document.getElementById('hpMpVisualizationToggle').checked) {
@@ -3831,35 +3849,59 @@ function calcDropMaps(simResult, playerToDisplay) {
     return { totalDropMap, noRngTotalDropMap };
 }
 
+// 按价格设置（'bid' 或 'ask'）解析物品单价；市场两边都没价时回退到 NPC 回收价（vendor）
+// 返回 { price: 单价, isVendor: 最终是否用的是 NPC 回收价 }
+function resolveItemPrice(item, setting) {
+    let price = -1;
+    let isVendor = false;
+    if (item) {
+        if (setting == 'bid') {
+            if (item['bid'] !== -1) {
+                price = item['bid'];
+            } else if (item['ask'] !== -1) {
+                price = item['ask'];
+            }
+        } else if (setting == 'ask') {
+            if (item['ask'] !== -1) {
+                price = item['ask'];
+            } else if (item['bid'] !== -1) {
+                price = item['bid'];
+            }
+        }
+        if (price == -1) {
+            price = item['vendor'];
+            isVendor = true;
+        }
+    }
+    return { price, isVendor };
+}
+
+// 计算某个掉落物品的税后系数：1 = 免税，(1 - MARKET_TAX_RATE) = 要扣税
+function getTaxFactor(itemHrid, simResult, isVendor) {
+    // 税率设为 0 时完全不算税
+    if (MARKET_TAX_RATE <= 0) return 1;
+    // 直接掉落的金币不经过市场，不收税
+    if (itemHrid === COIN_HRID) return 1;
+    // 按 NPC 回收价成交的不走市场，不收税
+    if (isVendor) return 1;
+    // 地下城 / 迷宫产出不收税
+    if (simResult.isDungeon || simResult.isLabyrinth) return 1;
+    // 其余情况按市场税率扣税
+    return 1 - MARKET_TAX_RATE;
+}
+
 function getDropProfit(simResult, playerToDisplay) {
     let { totalDropMap, noRngTotalDropMap } = calcDropMaps(simResult, playerToDisplay);
 
     let noRngTotal = 0;
+    let noRngTotalAfterTax = 0;
+    let revenueSetting = document.getElementById('selectPrices_drops').value;
     for (let [name, dropAmount] of noRngTotalDropMap.entries()) {
-        let price = -1;
-        let revenueSetting = document.getElementById('selectPrices_drops').value;
-        if (window.prices) {
-            let item = window.prices[name];
-            if (item) {
-                if (revenueSetting == 'bid') {
-                    if (item['bid'] !== -1) {
-                        price = item['bid'];
-                    } else if (item['ask'] !== -1) {
-                        price = item['ask'];
-                    }
-                } else if (revenueSetting == 'ask') {
-                    if (item['ask'] !== -1) {
-                        price = item['ask'];
-                    } else if (item['bid'] !== -1) {
-                        price = item['bid'];
-                    }
-                }
-                if (price == -1) {
-                    price = item['vendor'];
-                }
-            }
-        }
+        let { price, isVendor } = resolveItemPrice(window.prices ? window.prices[name] : undefined, revenueSetting);
+        // 税后金额 = 税前金额 × 税后系数（免税物品系数为 1）
+        let taxFactor = getTaxFactor(name, simResult, isVendor);
         noRngTotal += price * dropAmount;
+        noRngTotalAfterTax += price * dropAmount * taxFactor;
     }
 
     let consumablesUsed = simResult.consumablesUsed?.[playerToDisplay];
@@ -3872,35 +3914,17 @@ function getDropProfit(simResult, playerToDisplay) {
 
     let expenses = 0;
     for (const [consumable, amount] of consumablesUsed) {
-        let price = -1;
         let expensesSetting = document.getElementById('selectPrices_consumables').value;
-        if (window.prices) {
-            let item = window.prices[consumable];
-            if (item) {
-                if (expensesSetting == 'bid') {
-                    if (item['bid'] !== -1) {
-                        price = item['bid'];
-                    } else if (item['ask'] !== -1) {
-                        price = item['ask'];
-                    }
-                } else if (expensesSetting == 'ask') {
-                    if (item['ask'] !== -1) {
-                        price = item['ask'];
-                    } else if (item['bid'] !== -1) {
-                        price = item['bid'];
-                    }
-                }
-                if (price == -1) {
-                    price = item['vendor'];
-                }
-            }
-        }
+        // 消耗品是买入支出，不涉及市场卖税
+        let { price } = resolveItemPrice(window.prices ? window.prices[consumable] : undefined, expensesSetting);
         expenses += price * amount;
     }
 
     simResult["noRngRevenue"] = (noRngTotal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    simResult["noRngAfterTaxRevenue"] = (noRngTotalAfterTax).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     simResult["expenses"] = (expenses).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     simResult["noRngProfit"] = (noRngTotal - expenses).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    simResult["noRngAfterTaxProfit"] = (noRngTotalAfterTax - expenses).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function updateAllSimsModal(data) {
@@ -4095,6 +4119,7 @@ function showKills(simResult, playerToDisplay) {
 
     let revenueModalTable = document.querySelector("#revenueTable > tbody");
     let total = 0;
+    let totalAfterTax = 0;
     for (let [name, dropAmount] of totalDropMap.entries()) {
         let dropRow = createRow(
             ["col-md-6", "col-md-6 text-end"],
@@ -4103,32 +4128,12 @@ function showKills(simResult, playerToDisplay) {
         dropRow.firstElementChild.setAttribute("data-i18n", "itemNames." + name);
         newDropChildren.push(dropRow);
 
-        let tableRow = '<tr class="' + name.replace(/\s+/g, '') + '"><td data-i18n="itemNames.';
+        let { price, isVendor } = resolveItemPrice(window.prices ? window.prices[name] : undefined, document.getElementById('selectPrices_drops').value);
+        // 税后系数记在行属性 data-tax-factor 上，手动改价时用它重算税后总额
+        let taxFactor = getTaxFactor(name, simResult, isVendor);
+        let tableRow = '<tr class="' + name.replace(/\s+/g, '') + '" data-tax-factor="' + taxFactor + '"><td data-i18n="itemNames.';
         tableRow += name;
         tableRow += '"></td><td contenteditable="true">';
-        let price = -1;
-        let revenueSetting = document.getElementById('selectPrices_drops').value;
-        if (window.prices) {
-            let item = window.prices[name];
-            if (item) {
-                if (revenueSetting == 'bid') {
-                    if (item['bid'] !== -1) {
-                        price = item['bid'];
-                    } else if (item['ask'] !== -1) {
-                        price = item['ask'];
-                    }
-                } else if (revenueSetting == 'ask') {
-                    if (item['ask'] !== -1) {
-                        price = item['ask'];
-                    } else if (item['bid'] !== -1) {
-                        price = item['bid'];
-                    }
-                }
-                if (price == -1) {
-                    price = item['vendor'];
-                }
-            }
-        }
         tableRow += price;
         tableRow += '</td><td>';
         tableRow += dropAmount;
@@ -4137,12 +4142,14 @@ function showKills(simResult, playerToDisplay) {
         tableRow += '</td></tr>';
         revenueModalTable.innerHTML += tableRow;
         total += price * dropAmount;
+        totalAfterTax += price * dropAmount * taxFactor;
     }
 
 
 
     let noRngRevenueModalTable = document.querySelector("#noRngRevenueTable > tbody");
     let noRngTotal = 0;
+    let noRngTotalAfterTax = 0;
     for (let [name, dropAmount] of noRngTotalDropMap.entries()) {
         let noRngDropRow = createRow(
             ["col-md-6", "col-md-6 text-end"],
@@ -4151,32 +4158,12 @@ function showKills(simResult, playerToDisplay) {
         noRngDropRow.firstElementChild.setAttribute("data-i18n", "itemNames." + name);
         newNoRngDropChildren.push(noRngDropRow);
 
-        let tableRow = '<tr class="' + name.replace(/\s+/g, '') + '"><td data-i18n="itemNames.';
+        let { price, isVendor } = resolveItemPrice(window.prices ? window.prices[name] : undefined, document.getElementById('selectPrices_drops').value);
+        // 税后系数记在行属性 data-tax-factor 上，手动改价时用它重算税后总额
+        let taxFactor = getTaxFactor(name, simResult, isVendor);
+        let tableRow = '<tr class="' + name.replace(/\s+/g, '') + '" data-tax-factor="' + taxFactor + '"><td data-i18n="itemNames.';
         tableRow += name;
         tableRow += '"></td><td contenteditable="true">';
-        let price = -1;
-        let revenueSetting = document.getElementById('selectPrices_drops').value;
-        if (window.prices) {
-            let item = window.prices[name];
-            if (item) {
-                if (revenueSetting == 'bid') {
-                    if (item['bid'] !== -1) {
-                        price = item['bid'];
-                    } else if (item['ask'] !== -1) {
-                        price = item['ask'];
-                    }
-                } else if (revenueSetting == 'ask') {
-                    if (item['ask'] !== -1) {
-                        price = item['ask'];
-                    } else if (item['bid'] !== -1) {
-                        price = item['bid'];
-                    }
-                }
-                if (price == -1) {
-                    price = item['vendor'];
-                }
-            }
-        }
         tableRow += price;
         tableRow += '</td><td>';
         tableRow += dropAmount;
@@ -4185,12 +4172,15 @@ function showKills(simResult, playerToDisplay) {
         tableRow += '</td></tr>';
         noRngRevenueModalTable.innerHTML += tableRow;
         noRngTotal += price * dropAmount;
+        noRngTotalAfterTax += price * dropAmount * taxFactor;
     }
 
     document.getElementById('revenueSpan').innerText = total.toLocaleString();
     window.revenue = total;
+    window.revenueAfterTax = totalAfterTax;
     document.getElementById('noRngRevenueSpan').innerText = noRngTotal.toLocaleString();
     window.noRngRevenue = noRngTotal;
+    window.noRngRevenueAfterTax = noRngTotalAfterTax;
 
     let resultAccordion = document.getElementById("noRngDropsAccordion");
     showElement(resultAccordion);
@@ -6594,6 +6584,20 @@ document.addEventListener("input", (e) => {
         window.noRngProfit = window.noRngRevenue - window.expenses;
         document.getElementById('noRngProfitSpan').innerText = window.noRngProfit.toLocaleString();
         document.getElementById('noRngProfitPreview').innerText = window.noRngProfit.toLocaleString();
+
+        // 手动改价后重算税后期望：遍历 No RNG 收益表，
+        // 每行总额 × 该行的税后系数（data-tax-factor，建表时算好）再汇总
+        let noRngAfterTaxRevenue = 0;
+        document.querySelectorAll('#noRngRevenueTable tbody tr').forEach(tr => {
+            let tds = tr.querySelectorAll('td');
+            if (tds.length < 4) return; // 跳过表头行
+            let factor = parseFloat(tr.getAttribute('data-tax-factor') ?? '1');
+            noRngAfterTaxRevenue += (parseFloat(tds[3].innerText) || 0) * factor;
+        });
+        window.noRngRevenueAfterTax = noRngAfterTaxRevenue;
+        window.noRngAfterTaxProfit = noRngAfterTaxRevenue - window.expenses;
+        document.getElementById('noRngAfterTaxProfitSpan').innerText = window.noRngAfterTaxProfit.toLocaleString();
+        document.getElementById('noRngAfterTaxProfitPreview').innerText = window.noRngAfterTaxProfit.toLocaleString();
     }
 });
 

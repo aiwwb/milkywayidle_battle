@@ -37,6 +37,7 @@
     "total": "合计",
     "profit": "利润",
     "noRNGProfit": "期望利润",
+    "afterTaxNoRNGProfit": "税后期望利润",
     "expense": "支出",
     "revenue": "收入",
     "noRNGRevenue": "期望收入",
