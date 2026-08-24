@@ -109,9 +109,9 @@ index.html + src/main.js        UI 主线程：收集表单 → postMessage 给 
 
 ## 第三方集成
 
-- **访问量统计（不蒜子 busuanzi）**：`index.html` 引入 `busuanzi.js`，`<footer>` 里用 `#busuanzi_value_site_pv` / `#busuanzi_value_site_uv` 显示站点总访问量 / 访客数。
+- **访问量统计（Vercount，原不蒜子 busuanzi 的替身）**：`index.html` 引入 `https://events.vercount.one/js`（不蒜子官方服务已 404 停摆，2026-08 换成 Vercount），`<footer>` 里仍用 `#busuanzi_value_site_pv` / `#busuanzi_value_site_uv` 显示站点总访问量 / 访客数（Vercount 兼容 busuanzi 标签并自动同步其历史数据）。
   - 统计粒度按**域名**（整个 `aiwwb.github.io`），不是按仓库——若以后在同域名下新增 Pages 项目会共享计数器。
-  - 从接入时才开始统计（无历史数据）；服务偶发不稳定，加载失败时 footer 那行保持隐藏。
+  - 加载失败时 footer 那行保持隐藏。
 
 ## 二开提示
 
