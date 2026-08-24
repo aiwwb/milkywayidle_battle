@@ -13,6 +13,7 @@
     "getPrices": "获取价格",
     "editPrices": "编辑价格",
     "patchNotes": "更新日志",
+    "perDay": "/天",
     "calcEPHProfit": "计算EPH利润",
     "controls": {
         "title": "操作区域",
@@ -42,6 +43,9 @@
     "revenue": "收入",
     "noRNGRevenue": "期望收入",
     "dropTotal": "掉落物合计",
+    "dropDetails": "掉落物详情",
+    "dropQuantity": "掉落数量",
+    "expectedQuantity": "期望数量",
     "noRNGDrops": "非随机掉落物",
     "simulationResults": {
         "title": "模拟结果",
@@ -57,6 +61,8 @@
         "Yes": "是",
         "No": "否",
         "ranOutOfManaRatio": "法力值耗尽比例",
+        "teamDamageShareColumn": "队伍伤害占比",
+        "teamDamageShare": "（占队伍{{percent}}%）",
         "healthRestoredPerSecond": "每秒恢复的生命值",
         "manaRestoredPerSecond": "每秒恢复的法力值",
         "damageDoneTotal": "总伤害",

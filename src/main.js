@@ -1395,6 +1395,48 @@ function initDamageDoneTaken() {
     }
 }
 
+// 公共数字格式化：默认千分位；绝对值达到 threshold 后缩写为 K/M/B/T，最多保留两位小数
+// 返回 { text: 展示文本, full: 千分位精确值（用于悬浮提示） }
+function formatSmart(value, threshold = 1000) {
+    const abs = Math.abs(value);
+    const full = value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    let text = full;
+    if (abs >= threshold) {
+        const units = [[1e12, 'T'], [1e9, 'B'], [1e6, 'M'], [1e3, 'K']];
+        for (const [size, suffix] of units) {
+            if (abs >= size) {
+                text = (value / size).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + suffix;
+                break;
+            }
+        }
+    }
+    return { text, full };
+}
+
+function updateProfitDisplay(simResult) {
+    const values = [
+        ['revenueSpan', window.revenue], ['revenuePreview', window.revenue],
+        ['expensesSpan', window.expenses], ['expensesSummarySpan', window.expenses], ['expensesPreview', window.expenses],
+        ['profitSpan', window.profit], ['profitPreview', window.profit],
+        ['noRngRevenueSpan', window.noRngRevenue], ['noRngRevenuePreview', window.noRngRevenue],
+        ['noRngProfitSpan', window.noRngProfit], ['noRngProfitPreview', window.noRngProfit],
+        ['noRngAfterTaxProfitSpan', window.noRngAfterTaxProfit], ['noRngAfterTaxProfitPreview', window.noRngAfterTaxProfit]
+    ];
+    let hoursSimulated = simResult ? simResult.simulatedTime / ONE_HOUR : 24;
+    for (const [id, value] of values) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        const info = formatSmart(value);
+        let text = info.text;
+        // 非 24h 模拟时，在数值后括号标注按 24h 折算的每日数据
+        if (hoursSimulated > 0 && Math.abs(hoursSimulated - 24) > 1e-6) {
+            text += " (" + formatSmart(value * 24 / hoursSimulated).text + i18next.t('common:perDay') + ")";
+        }
+        el.textContent = text;
+        el.title = info.full;
+    }
+}
+
 function showSimulationResult(simResult) {
     currentSimResults = simResult;
     let expensesModalTable = document.querySelector("#expensesTable > tbody");
@@ -1423,15 +1465,10 @@ function showSimulationResult(simResult) {
     showDamageTaken(simResult, playerToDisplay);
     renderWipeEvents(simResult);
     window.profit = window.revenue - window.expenses;
-    document.getElementById('profitSpan').innerText = window.profit.toLocaleString();
-    document.getElementById('profitPreview').innerText = window.profit.toLocaleString();
     window.noRngProfit = window.noRngRevenue - window.expenses;
-    document.getElementById('noRngProfitSpan').innerText = window.noRngProfit.toLocaleString();
-    document.getElementById('noRngProfitPreview').innerText = window.noRngProfit.toLocaleString();
     // 税后收益/利润（金币、vendor 价、地下城、迷宫免税，其余按 MARKET_TAX_RATE 扣税）
     window.noRngAfterTaxProfit = window.noRngRevenueAfterTax - window.expenses;
-    document.getElementById('noRngAfterTaxProfitSpan').innerText = window.noRngAfterTaxProfit.toLocaleString();
-    document.getElementById('noRngAfterTaxProfitPreview').innerText = window.noRngAfterTaxProfit.toLocaleString();
+    updateProfitDisplay(simResult);
     
     // 显示战斗图表
     if (document.getElementById('hpMpVisualizationToggle').checked) {
@@ -1852,8 +1889,25 @@ function manipulateSimResultsDataForDisplay(simResults) {
             let noRngProfit = simResult["noRngProfit"];
             let expenses = simResult["expenses"];
 
+            let ranOutOfManaRatio = "-";
+            if (simResult.playerRanOutOfMana?.[playerToDisplay]) {
+                let stat = simResult.playerRanOutOfManaTime[playerToDisplay];
+                let totalTimeForOut = stat.totalTimeForOutOfMana
+                    + (stat.isOutOfMana ? (simResult.simulatedTime - stat.startTimeForOutOfMana) : 0);
+                ranOutOfManaRatio = (totalTimeForOut / simResult.simulatedTime * 100).toFixed(2) + "%";
+            }
+
+            let { damages: playerDamages, teamDamage } = calcTeamDamageInfo(simResult);
+            let teamDamageShare = "-";
+            if (teamDamage > 0) {
+                teamDamageShare = (100 * (playerDamages[playerToDisplay] ?? 0) / teamDamage).toFixed(2) + "%";
+            }
+
             let displaySimRow = {
-                "ZoneName": zoneName, "DifficultyTier": difficultyTier, "Player": playerToDisplay, "Encounters": encountersPerHour, "Deaths": deathsPerHour,
+                "ZoneName": zoneName, "DifficultyTier": difficultyTier, "Player": playerToDisplay, "Encounters": encountersPerHour,
+                "teamDamageShare": teamDamageShare,
+                "Deaths": deathsPerHour,
+                "ranOutOfManaRatio": ranOutOfManaRatio,
                 "TotalExperience": totalExperiencePerHour, "Stamina": experiencePerHour["Stamina"],
                 "Intelligence": experiencePerHour["Intelligence"], "Attack": experiencePerHour["Attack"],
                 "Magic": experiencePerHour["Magic"], "Ranged": experiencePerHour["Ranged"],
@@ -1966,11 +2020,16 @@ function calcDropMaps(simResult, playerToDisplay) {
     return { totalDropMap, noRngTotalDropMap };
 }
 
-// 按价格设置（'bid' 或 'ask'）解析物品单价；市场两边都没价时回退到 NPC 回收价（vendor）
+// 按价格设置（'bid' 或 'ask'）解析物品单价；市场两边都没价或未获取市场价时回退到 NPC 回收价（vendor）
 // 返回 { price: 单价, isVendor: 最终是否用的是 NPC 回收价 }
-function resolveItemPrice(item, setting) {
+function resolveItemPrice(itemHrid, setting) {
     let price = -1;
     let isVendor = false;
+    // 金币是货币本身，单价恒为 1
+    if (itemHrid === COIN_HRID) {
+        return { price: 1, isVendor: false };
+    }
+    let item = window.prices ? window.prices[itemHrid] : undefined;
     if (item) {
         if (setting == 'bid') {
             if (item['bid'] !== -1) {
@@ -1989,6 +2048,11 @@ function resolveItemPrice(item, setting) {
             price = item['vendor'];
             isVendor = true;
         }
+    }
+    // 未获取到市场价格时按 NPC 回收价估算，避免 -1 污染收入/利润统计
+    if (price === -1 || price == null) {
+        price = itemDetailMap[itemHrid]?.sellPrice ?? 0;
+        isVendor = true;
     }
     return { price, isVendor };
 }
@@ -2014,7 +2078,7 @@ function getDropProfit(simResult, playerToDisplay) {
     let noRngTotalAfterTax = 0;
     let revenueSetting = document.getElementById('selectPrices_drops').value;
     for (let [name, dropAmount] of noRngTotalDropMap.entries()) {
-        let { price, isVendor } = resolveItemPrice(window.prices ? window.prices[name] : undefined, revenueSetting);
+        let { price, isVendor } = resolveItemPrice(name, revenueSetting);
         // 税后金额 = 税前金额 × 税后系数（免税物品系数为 1）
         let taxFactor = getTaxFactor(name, simResult, isVendor);
         noRngTotal += price * dropAmount;
@@ -2033,7 +2097,7 @@ function getDropProfit(simResult, playerToDisplay) {
     for (const [consumable, amount] of consumablesUsed) {
         let expensesSetting = document.getElementById('selectPrices_consumables').value;
         // 消耗品是买入支出，不涉及市场卖税
-        let { price } = resolveItemPrice(window.prices ? window.prices[consumable] : undefined, expensesSetting);
+        let { price } = resolveItemPrice(consumable, expensesSetting);
         expenses += price * amount;
     }
 
@@ -2067,53 +2131,116 @@ function updateAllSimsModal(data) {
         tableBody.appendChild(row);
     });
 
+    allSimsOriginalRows = Array.from(tableBody.querySelectorAll('tr'));
+    currentSortColumn = null;
+    currentSortDirection = 'desc';
+    updateSortIndicators('allZonesData', -1, 'none');
+
+    // 经验七列（skillNames 开头的表头）若整列为 0 则隐藏该列
+    document.querySelectorAll('#allZonesData thead th').forEach((th, idx) => {
+        const i18n = th.getAttribute('data-i18n') ?? '';
+        if (!i18n.startsWith('skillNames.')) {
+            return;
+        }
+        const allZero = allSimsOriginalRows.length > 0 && allSimsOriginalRows.every(row => {
+            const value = parseFloat(row.children[idx].textContent.trim());
+            return !isNaN(value) && value === 0;
+        });
+        const display = allZero ? 'none' : '';
+        th.style.display = display;
+        allSimsOriginalRows.forEach(row => { row.children[idx].style.display = display; });
+    });
 }
 
 let currentSortColumn = null;
 let currentSortDirection = 'desc';
+let allSimsOriginalRows = [];
 
-function sortTable(tableId, columnIndex, direction) {
-    const table = document.getElementById(tableId);
-    const tbody = table.querySelector('tbody');
-    const rows = Array.from(tbody.querySelectorAll('tr'));
+function parseNumericCell(cell) {
+    const value = parseFloat(cell.textContent.trim().replace(/[\s,]/g, ""));
+    return isNaN(value) ? null : value;
+}
 
-    const sortedRows = rows.sort((rowA, rowB) => {
-        const cellA = rowA.children[columnIndex].textContent.trim().replace(/[\s,]/g, '');
-        const cellB = rowB.children[columnIndex].textContent.trim().replace(/[\s,]/g, '');
+function sortAllSimsTable(columnIndex, direction) {
+    const tbody = document.querySelector('#allZonesData tbody');
+    if (direction === 'none') {
+        tbody.replaceChildren(...allSimsOriginalRows);
+        updateSortIndicators('allZonesData', -1, 'none');
+        return;
+    }
 
-        const valueA = parseFloat(cellA.replace(/,/g, ''));
-        const valueB = parseFloat(cellB.replace(/,/g, ''));
+    // 玩家列按行独立排序，不锁定组
+    if (columnIndex === 2) {
+        const decorated = allSimsOriginalRows.map((row, index) => ({
+            row,
+            index,
+            key: row.children[columnIndex].textContent.trim()
+        }));
+        decorated.sort((a, b) => {
+            if (a.key !== b.key) return direction === 'desc' ? b.key.localeCompare(a.key) : a.key.localeCompare(b.key);
+            return a.index - b.index;
+        });
+        tbody.replaceChildren(...decorated.map(d => d.row));
+        updateSortIndicators('allZonesData', columnIndex, direction);
+        return;
+    }
 
-        return direction === 'asc' ? valueA - valueB : valueB - valueA;
+    // 以组（同 zone/difficulty 的多玩家行）为单位排序：降序取组内最大值，升序取组内最小值
+    const groupKeyOf = row => row.children[0].textContent.trim() + "#" + row.children[1].textContent.trim();
+    const groupStats = new Map();
+    allSimsOriginalRows.forEach(row => {
+        const value = parseNumericCell(row.children[columnIndex]);
+        if (value === null) return;
+        const key = groupKeyOf(row);
+        const stats = groupStats.get(key) ?? { max: -Infinity, min: Infinity };
+        stats.max = Math.max(stats.max, value);
+        stats.min = Math.min(stats.min, value);
+        groupStats.set(key, stats);
     });
 
-    sortedRows.forEach(row => tbody.appendChild(row));
-    updateSortIndicators(tableId, columnIndex, direction);
+    const decorated = allSimsOriginalRows.map((row, index) => {
+        const stats = groupStats.get(groupKeyOf(row));
+        return { row, index, key: stats ? (direction === 'desc' ? stats.max : stats.min) : null };
+    });
+    decorated.sort((a, b) => {
+        if (a.key === null || b.key === null) {
+            if (a.key === null && b.key === null) return a.index - b.index;
+            return a.key === null ? 1 : -1;
+        }
+        if (a.key !== b.key) return direction === 'desc' ? b.key - a.key : a.key - b.key;
+        return a.index - b.index;
+    });
+
+    tbody.replaceChildren(...decorated.map(d => d.row));
+    updateSortIndicators('allZonesData', columnIndex, direction);
 }
 
 function updateSortIndicators(tableId, columnIndex, direction) {
     const headers = document.querySelectorAll(`#${tableId} th`);
     headers.forEach((header, index) => {
         header.classList.remove('sort-asc', 'sort-desc');
-        if (index === columnIndex) {
+        if (index === columnIndex && direction !== 'none') {
             header.classList.add(direction === 'asc' ? 'sort-asc' : 'sort-desc');
         }
     });
 }
 
 document.querySelectorAll('#allZonesData th').forEach((header, index) => {
-    if (index === 0) return;
-    if (index === 1) return;
-    if (index === 2) return;
+    if (index <= 1) return;
 
     header.addEventListener('click', () => {
-        if (currentSortColumn === index) {
-            currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
+        if (currentSortColumn !== index) {
             currentSortColumn = index;
             currentSortDirection = 'desc';
+        } else if (currentSortDirection === 'desc') {
+            currentSortDirection = 'asc';
+        } else if (currentSortDirection === 'asc') {
+            currentSortColumn = null;
+            currentSortDirection = 'none';
+        } else {
+            currentSortDirection = 'desc';
         }
-        sortTable('allZonesData', currentSortColumn, currentSortDirection);
+        sortAllSimsTable(index, currentSortDirection);
     });
 });
 
@@ -2146,11 +2273,7 @@ document.getElementById('buttonExportResults').addEventListener('click', functio
 
 function showKills(simResult, playerToDisplay) {
     let resultDiv = document.getElementById("simulationResultKills");
-    let dropsResultDiv = document.getElementById("simulationResultDrops");
-    let noRngDropsResultDiv = document.getElementById("noRngDrops");
     let newChildren = [];
-    let newDropChildren = [];
-    let newNoRngDropChildren = [];
 
     let hoursSimulated = simResult.simulatedTime / ONE_HOUR;
     if (simResult.isDungeon && simResult.lastDungeonFinishTime > 0) {
@@ -2234,20 +2357,34 @@ function showKills(simResult, playerToDisplay) {
 
     let { totalDropMap, noRngTotalDropMap } = !simResult.isDungeon ? calcDropMaps(simResult, playerToDisplay) : {totalDropMap:new Map(), noRngTotalDropMap:new Map()};
 
+    let dropSetting = document.getElementById('selectPrices_drops').value;
+    let dropDetailRows = document.getElementById('dropDetailRows');
+    let newDropDetailChildren = [];
     let revenueModalTable = document.querySelector("#revenueTable > tbody");
     let total = 0;
     let totalAfterTax = 0;
     for (let [name, dropAmount] of totalDropMap.entries()) {
-        let dropRow = createRow(
-            ["col-md-6", "col-md-6 text-end"],
-            [name, dropAmount.toLocaleString()]
-        );
-        dropRow.firstElementChild.setAttribute("data-i18n", "itemNames." + name);
-        newDropChildren.push(dropRow);
-
-        let { price, isVendor } = resolveItemPrice(window.prices ? window.prices[name] : undefined, document.getElementById('selectPrices_drops').value);
+        let { price, isVendor } = resolveItemPrice(name, dropSetting);
         // 税后系数记在行属性 data-tax-factor 上，手动改价时用它重算税后总额
         let taxFactor = getTaxFactor(name, simResult, isVendor);
+
+        let expectedAmount = noRngTotalDropMap.get(name) ?? 0;
+        // 数量列 ≥100k 才缩写，价格/合计始终缩写；悬浮 title 展示精确值
+        let expectedInfo = formatSmart(expectedAmount, 1e5);
+        let droppedInfo = formatSmart(dropAmount, 1e5);
+        let priceInfo = formatSmart(price);
+        let totalInfo = formatSmart(dropAmount * price);
+        let detailRow = createRow(
+            ["col-md-4", "col-md-2 text-end", "col-md-2 text-end", "col-md-2 text-end", "col-md-2 text-end"],
+            [name, expectedInfo.text, droppedInfo.text, priceInfo.text, totalInfo.text]
+        );
+        detailRow.firstElementChild.setAttribute("data-i18n", "itemNames." + name);
+        detailRow.children[1].title = expectedInfo.full;
+        detailRow.children[2].title = droppedInfo.full;
+        detailRow.children[3].title = priceInfo.full;
+        detailRow.children[4].title = totalInfo.full;
+        newDropDetailChildren.push(detailRow);
+
         let tableRow = '<tr class="' + name.replace(/\s+/g, '') + '" data-tax-factor="' + taxFactor + '"><td data-i18n="itemNames.';
         tableRow += name;
         tableRow += '"></td><td contenteditable="true">';
@@ -2262,20 +2399,11 @@ function showKills(simResult, playerToDisplay) {
         totalAfterTax += price * dropAmount * taxFactor;
     }
 
-
-
     let noRngRevenueModalTable = document.querySelector("#noRngRevenueTable > tbody");
     let noRngTotal = 0;
     let noRngTotalAfterTax = 0;
     for (let [name, dropAmount] of noRngTotalDropMap.entries()) {
-        let noRngDropRow = createRow(
-            ["col-md-6", "col-md-6 text-end"],
-            [name, dropAmount.toLocaleString()]
-        );
-        noRngDropRow.firstElementChild.setAttribute("data-i18n", "itemNames." + name);
-        newNoRngDropChildren.push(noRngDropRow);
-
-        let { price, isVendor } = resolveItemPrice(window.prices ? window.prices[name] : undefined, document.getElementById('selectPrices_drops').value);
+        let { price, isVendor } = resolveItemPrice(name, dropSetting);
         // 税后系数记在行属性 data-tax-factor 上，手动改价时用它重算税后总额
         let taxFactor = getTaxFactor(name, simResult, isVendor);
         let tableRow = '<tr class="' + name.replace(/\s+/g, '') + '" data-tax-factor="' + taxFactor + '"><td data-i18n="itemNames.';
@@ -2299,12 +2427,15 @@ function showKills(simResult, playerToDisplay) {
     window.noRngRevenue = noRngTotal;
     window.noRngRevenueAfterTax = noRngTotalAfterTax;
 
-    let resultAccordion = document.getElementById("noRngDropsAccordion");
-    showElement(resultAccordion);
+    dropDetailRows.replaceChildren(...newDropDetailChildren);
+
+    // 单价列头显示当前掉落物价格配置项的名称
+    const dropPriceOption = document.getElementById('selectPrices_drops').selectedOptions[0];
+    if (dropPriceOption) {
+        document.getElementById('dropDetailPriceHeader').textContent = dropPriceOption.textContent;
+    }
 
     resultDiv.replaceChildren(...newChildren);
-    dropsResultDiv.replaceChildren(...newDropChildren);
-    noRngDropsResultDiv.replaceChildren(...newNoRngDropChildren);
 }
 
 function showDeaths(simResult, playerToDisplay) {
@@ -2397,29 +2528,8 @@ function showConsumablesUsed(simResult, playerToDisplay) {
         let tableRow = '<tr class="' + consumable + '"><td data-i18n="itemNames.';
         tableRow += consumable;
         tableRow += '"></td><td contenteditable="true">';
-        let price = -1;
         let expensesSetting = document.getElementById('selectPrices_consumables').value;
-        if (window.prices) {
-            let item = window.prices[consumable];
-            if (item) {
-                if (expensesSetting == 'bid') {
-                    if (item['bid'] !== -1) {
-                        price = item['bid'];
-                    } else if (item['ask'] !== -1) {
-                        price = item['ask'];
-                    }
-                } else if (expensesSetting == 'ask') {
-                    if (item['ask'] !== -1) {
-                        price = item['ask'];
-                    } else if (item['bid'] !== -1) {
-                        price = item['bid'];
-                    }
-                }
-                if (price == -1) {
-                    price = item['vendor'];
-                }
-            }
-        }
+        let price = resolveItemPrice(consumable, expensesSetting).price;
         tableRow += price;
         tableRow += '</td><td>';
         tableRow += amount;
@@ -2714,6 +2824,42 @@ function showDamageDone(simResult, playerToDisplay) {
 
     let totalResultDiv = document.getElementById("simulationResultTotalDamageDone");
     createDamageTable(totalResultDiv, totalDamageDone, totalSecondsSimulated);
+
+    // 标题旁标注该玩家占队伍的伤害百分比，单人模拟不展示
+    let teamShareSpan = document.getElementById("damageDoneTeamShare");
+    if (!teamShareSpan) return;
+    let { damages: playerDamages, teamDamage } = calcTeamDamageInfo(simResult);
+    if (simResult.numberOfPlayers > 1 && teamDamage > 0) {
+        let percent = (100 * (playerDamages[playerToDisplay] ?? 0) / teamDamage).toFixed(2);
+        teamShareSpan.textContent = i18next.t('common:simulationResults.teamDamageShare', { percent });
+        teamShareSpan.classList.remove('d-none');
+    } else {
+        teamShareSpan.classList.add('d-none');
+    }
+}
+
+// 汇总各玩家造成的总伤害（基于 attacks 记录），用于计算占队伍伤害比例
+function calcTeamDamageInfo(simResult) {
+    const validPlayers = ["player1", "player2", "player3", "player4", "player5"];
+    let damages = {};
+    let teamDamage = 0;
+    for (const [source, targets] of Object.entries(simResult.attacks)) {
+        if (!validPlayers.includes(source)) continue;
+        let damage = 0;
+        for (const abilities of Object.values(targets)) {
+            if (!abilities) continue;
+            for (const abilityCasts of Object.values(abilities)) {
+                if (!abilityCasts) continue;
+                for (const [dmgKey, count] of Object.entries(abilityCasts)) {
+                    if (dmgKey === 'miss') continue;
+                    damage += Number(dmgKey) * count;
+                }
+            }
+        }
+        damages[source] = damage;
+        teamDamage += damage;
+    }
+    return { damages, teamDamage };
 }
 
 function showDamageTaken(simResult, playerToDisplay) {
@@ -2960,7 +3106,7 @@ function initSimulationControls() {
     let simulationTimeInput = document.getElementById("inputSimulationTime");
     simulationTimeInput.value = 24;
 
-    buttonStartSimulation.addEventListener("click", (event) => {
+    buttonStartSimulation.addEventListener("click", async (event) => {
         let invalidElements = document.querySelectorAll(":invalid");
         if (invalidElements.length > 0) {
             invalidElements.forEach((element) => element.reportValidity());
@@ -2984,6 +3130,9 @@ function initSimulationControls() {
         }
         // buttonStartSimulation.disabled = true;
         buttonStopSimulation.style.display = 'block';
+        if (!window.prices) {
+            await fetchPrices();
+        }
         startSimulation(selectedPlayers);
     });
 
@@ -4689,18 +4838,13 @@ document.addEventListener("input", (e) => {
         }
 
         window.expenses += expensesDifference;
-        document.getElementById('expensesSpan').innerText = window.expenses.toLocaleString();
         window.revenue += revenueDifference;
         document.getElementById('revenueSpan').innerText = window.revenue.toLocaleString();
         window.noRngRevenue += noRngRevenueDifference;
         document.getElementById('noRngRevenueSpan').innerText = window.noRngRevenue.toLocaleString();
 
         window.profit = window.revenue - window.expenses;
-        document.getElementById('profitPreview').innerText = window.profit.toLocaleString();
-        document.getElementById('profitSpan').innerText = window.profit.toLocaleString();
         window.noRngProfit = window.noRngRevenue - window.expenses;
-        document.getElementById('noRngProfitSpan').innerText = window.noRngProfit.toLocaleString();
-        document.getElementById('noRngProfitPreview').innerText = window.noRngProfit.toLocaleString();
 
         // 手动改价后重算税后期望：遍历 No RNG 收益表，
         // 每行总额 × 该行的税后系数（data-tax-factor，建表时算好）再汇总
@@ -4713,8 +4857,7 @@ document.addEventListener("input", (e) => {
         });
         window.noRngRevenueAfterTax = noRngAfterTaxRevenue;
         window.noRngAfterTaxProfit = noRngAfterTaxRevenue - window.expenses;
-        document.getElementById('noRngAfterTaxProfitSpan').innerText = window.noRngAfterTaxProfit.toLocaleString();
-        document.getElementById('noRngAfterTaxProfitPreview').innerText = window.noRngAfterTaxProfit.toLocaleString();
+        updateProfitDisplay(currentSimResults);
     }
 });
 
@@ -4743,22 +4886,68 @@ function updateTable(tableId, item, price) {
 
 function initPatchNotes() {
     const patchNotesRows = document.getElementById("patchNotes");
+    const timelineNav = document.getElementById("patchNotesTimeline");
+    patchNotesRows.innerHTML = '';
+    timelineNav.innerHTML = '';
+    const monthFirstIndex = {};
+    let groupIndex = 0;
     for (const pn in patchNote) {
         const patchNoteContainer = document.createElement("div");
-        patchNotesRows.setAttribute('class', 'col-12 mb-4');
+        patchNoteContainer.className = "col-12 mb-4";
+        patchNoteContainer.id = "patchNoteGroup" + groupIndex;
 
         const patchNoteElement = document.createElement("h6");
         patchNoteElement.innerHTML = pn;
         const patchNoteList = document.createElement("ul");
         for (const note of patchNote[pn]) {
             const noteElement = document.createElement("li");
-            noteElement.innerHTML = note;
+            if (typeof note === "string") {
+                noteElement.innerHTML = note;
+            } else {
+                noteElement.innerHTML = note.text;
+                if (note.author) {
+                    const authorBadge = document.createElement("span");
+                    authorBadge.className = "badge bg-secondary ms-1";
+                    authorBadge.textContent = note.author;
+                    noteElement.appendChild(authorBadge);
+                }
+            }
             patchNoteList.appendChild(noteElement);
         }
         patchNoteContainer.appendChild(patchNoteElement);
         patchNoteContainer.appendChild(patchNoteList);
-
         patchNotesRows.appendChild(patchNoteContainer);
+
+        // 记录每个月份首次出现的分组，用于按月导航
+        const monthKey = pn.split("月")[0] + "月";
+        if (!(monthKey in monthFirstIndex)) {
+            monthFirstIndex[monthKey] = groupIndex;
+        }
+        groupIndex++;
+    }
+
+    // 左侧时间线：按月导航，点击跳转到该月第一个分组
+    let firstMonth = true;
+    for (const monthKey in monthFirstIndex) {
+        const timelineItem = document.createElement("div");
+        timelineItem.className = "timeline-item" + (firstMonth ? " active" : "");
+        firstMonth = false;
+        timelineItem.textContent = monthKey;
+        timelineItem.dataset.group = monthFirstIndex[monthKey];
+        timelineItem.addEventListener("click", function () {
+            timelineNav.querySelectorAll(".timeline-item").forEach(el => el.classList.remove("active"));
+            this.classList.add("active");
+            const target = document.getElementById("patchNoteGroup" + this.dataset.group);
+            const contentCol = target?.closest(".patch-notes-layout > .col");
+            const firstGroup = document.getElementById("patchNoteGroup0");
+            if (target && contentCol && firstGroup) {
+                // 滚动后目标标题与内容区顶部的间距，与默认状态（未滚动时首个分组的位置）保持一致
+                const baseOffset = firstGroup.getBoundingClientRect().top - contentCol.getBoundingClientRect().top + contentCol.scrollTop;
+                const delta = target.getBoundingClientRect().top - contentCol.getBoundingClientRect().top;
+                contentCol.scrollTo({ top: contentCol.scrollTop + delta - baseOffset, behavior: "smooth" });
+            }
+        });
+        timelineNav.appendChild(timelineItem);
     }
 }
 

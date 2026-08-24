@@ -12046,6 +12046,14 @@ document.addEventListener('DOMContentLoaded', function () {
         switcherContainer.style.right = '10px';
         switcherContainer.style.zIndex = '1000';
 
+        const changelogButton = document.createElement('button');
+        changelogButton.className = 'btn btn-sm btn-outline-secondary';
+        changelogButton.setAttribute('data-i18n', 'common:patchNotes');
+        changelogButton.textContent = i18next.t('common:patchNotes') || 'Patch Notes';
+        changelogButton.onclick = function () {
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('patchNotesModal')).show();
+        };
+
         const enButton = document.createElement('button');
         enButton.className = 'btn btn-sm ' + (i18next.language === 'en' ? 'btn-primary' : 'btn-outline-primary');
         enButton.textContent = "English";
@@ -12064,6 +12072,8 @@ document.addEventListener('DOMContentLoaded', function () {
             enButton.className = 'btn btn-sm btn-outline-primary';
         };
 
+        switcherContainer.appendChild(changelogButton);
+        switcherContainer.appendChild(document.createTextNode(' '));
         switcherContainer.appendChild(enButton);
         switcherContainer.appendChild(document.createTextNode(' '));
         switcherContainer.appendChild(zhButton);

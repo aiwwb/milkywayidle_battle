@@ -101,6 +101,149 @@
             padding: 15px; /* Padding inside the box */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional shadow for better visibility */
         }
+
+        /* 全局统一滚动条样式（页面、弹窗及任何可滚动区域自动生效） */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #adb5bd transparent;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #adb5bd;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            background-clip: content-box;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #6c757d;
+        }
+
+        body.dark-mode * {
+            scrollbar-color: #888 #555;
+        }
+
+        body.dark-mode ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        body.dark-mode ::-webkit-scrollbar-thumb {
+            background-color: #888;
+        }
+
+        body.dark-mode ::-webkit-scrollbar-thumb:hover {
+            background-color: #aaa;
+        }
+
+        /* 更新日志弹窗左侧时间线 */
+        #patchNotesModal .modal-body {
+            display: flex;
+            min-height: 0;
+        }
+
+        #patchNotesModal .modal-body .container-fluid {
+            display: flex;
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .patch-notes-layout {
+            flex: 1 1 auto;
+            min-width: 0;
+            min-height: 0;
+        }
+
+        .patch-notes-layout > .col,
+        .patch-notes-layout > .col-auto {
+            height: 100%;
+        }
+
+        .patch-notes-layout > .col {
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-top: 12px;
+        }
+
+        .patch-notes-timeline {
+            position: relative;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .patch-notes-timeline::before {
+            content: '';
+            position: absolute;
+            left: 4px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #ccc;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 2px 8px 2px 18px;
+            margin: 3px 0;
+            cursor: pointer;
+            font-size: 0.78rem;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 1px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ccc;
+            border: 2px solid #fff;
+        }
+
+        .timeline-item:hover,
+        .timeline-item.active {
+            color: #0d6efd;
+            text-shadow: 0.45px 0 0 currentColor, -0.45px 0 0 currentColor;
+        }
+
+        .timeline-item.active::before {
+            background: #0d6efd;
+        }
+
+        body.dark-mode .patch-notes-timeline::before {
+            background: #666;
+        }
+
+        body.dark-mode .timeline-item {
+            color: #999;
+        }
+
+        body.dark-mode .timeline-item:hover,
+        body.dark-mode .timeline-item.active {
+            color: #4da3ff;
+        }
+
+        body.dark-mode .timeline-item.active::before {
+            background: #4da3ff;
+        }
+
+        body.dark-mode .timeline-item::before {
+            background: #666;
+            border-color: #333;
+        }
     </style>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -169,16 +312,16 @@
                             </div>
                         </div>
                         <div class="row mb-2">
-                            <label for="inputLevel_melee" class="col-md-6 col-form-label" data-i18n="skillNames./skills/melee">Melee</label>
+                            <label for="inputLevel_defense" class="col-md-6 col-form-label" data-i18n="skillNames./skills/defense">Defense</label>
                             <div class="col-md-6">
-                                <input type="number" id="inputLevel_melee" class="form-control" value="1" min="1"
+                                <input type="number" id="inputLevel_defense" class="form-control" value="1" min="1"
                                     max="400" required />
                             </div>
                         </div>
                         <div class="row mb-2">
-                            <label for="inputLevel_defense" class="col-md-6 col-form-label" data-i18n="skillNames./skills/defense">Defense</label>
+                            <label for="inputLevel_melee" class="col-md-6 col-form-label" data-i18n="skillNames./skills/melee">Melee</label>
                             <div class="col-md-6">
-                                <input type="number" id="inputLevel_defense" class="form-control" value="1" min="1"
+                                <input type="number" id="inputLevel_melee" class="form-control" value="1" min="1"
                                     max="400" required />
                             </div>
                         </div>
@@ -197,22 +340,20 @@
                             </div>
                         </div>
                         <div class="row mb-2">
-                            <button id="buttonHouseRoomsModal" class="btn btn-primary" type="button"
-                                data-bs-toggle="modal" data-bs-target="#houseRoomsModal" data-i18n="characterManagement.house">
-                                House Rooms
-                            </button>
-                        </div>
-                        <div class="row mb-2">
-                            <button id="buttonAchievementsModal" class="btn btn-primary" type="button"
-                                data-bs-toggle="modal" data-bs-target="#achievementsModal" data-i18n="achievementsPanel.achievements">
-                                House Rooms
-                            </button>
-                        </div>
-                        <div class="row mb-2">
-                            <button id="buttonShrinesModal" class="btn btn-primary" type="button"
-                                data-bs-toggle="modal" data-bs-target="#shrinesModal" data-i18n="characterManagement.shrine">
-                                Shrines
-                            </button>
+                            <div class="col-12 d-flex gap-1">
+                                <button id="buttonHouseRoomsModal" class="btn btn-primary flex-fill" type="button"
+                                    data-bs-toggle="modal" data-bs-target="#houseRoomsModal" data-i18n="characterManagement.house">
+                                    House Rooms
+                                </button>
+                                <button id="buttonAchievementsModal" class="btn btn-primary flex-fill" type="button"
+                                    data-bs-toggle="modal" data-bs-target="#achievementsModal" data-i18n="achievementsPanel.achievements">
+                                    Achievements
+                                </button>
+                                <button id="buttonShrinesModal" class="btn btn-primary flex-fill" type="button"
+                                    data-bs-toggle="modal" data-bs-target="#shrinesModal" data-i18n="characterManagement.shrine">
+                                    Shrines
+                                </button>
+                            </div>
                         </div>
                         <!-- #endregion -->
                         <div class="row">
@@ -246,6 +387,30 @@
                             <div class="col-md-4"><b data-i18n="marketplacePanel.enhancementLevel">Enhancement Level</b></div>
                         </div>
                         <div class="row mb-2">
+                            <label for="selectEquipment_weapon" class="col-md-2 col-form-label" data-i18n="characterItemsUtil.mainHand">Weapon</label>
+                            <div class="col-md-6">
+                                <select id="selectEquipment_weapon" class="form-select">
+                                    <option value="" data-i18n="characterSelectPage.slots.empty">Empty</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="number" id="inputEquipmentEnhancementLevel_weapon" class="form-control"
+                                    value="0" min="0" max="20" required />
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label for="selectEquipment_off_hand" class="col-md-2 col-form-label" data-i18n="characterItemsUtil.offHand">Offhand</label>
+                            <div class="col-md-6">
+                                <select id="selectEquipment_off_hand" class="form-select">
+                                    <option value="" data-i18n="characterSelectPage.slots.empty">Empty</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="number" id="inputEquipmentEnhancementLevel_off_hand" class="form-control"
+                                    value="0" min="0" max="20" required />
+                            </div>
+                        </div>
+                        <div class="row mb-2">
                             <label for="selectEquipment_head" class="col-md-2 col-form-label" data-i18n="characterItemsUtil.head">Head</label>
                             <div class="col-md-6">
                                 <select id="selectEquipment_head" class="form-select">
@@ -254,30 +419,6 @@
                             </div>
                             <div class="col-md-4">
                                 <input type="number" id="inputEquipmentEnhancementLevel_head" class="form-control"
-                                    value="0" min="0" max="20" required />
-                            </div>
-                        </div>
-                        <div class="row mb-2">
-                            <label for="selectEquipment_neck" class="col-md-2 col-form-label" data-i18n="characterItemsUtil.neck">Neck</label>
-                            <div class="col-md-6">
-                                <select id="selectEquipment_neck" class="form-select">
-                                    <option value="" data-i18n="characterSelectPage.slots.empty">Empty</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <input type="number" id="inputEquipmentEnhancementLevel_neck" class="form-control"
-                                    value="0" min="0" max="20" required />
-                            </div>
-                        </div>
-                        <div class="row mb-2">
-                            <label for="selectEquipment_earrings" class="col-md-2 col-form-label" data-i18n="characterItemsUtil.earrings">Earrings</label>
-                            <div class="col-md-6">
-                                <select id="selectEquipment_earrings" class="form-select">
-                                    <option value="" data-i18n="characterSelectPage.slots.empty">Empty</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <input type="number" id="inputEquipmentEnhancementLevel_earrings" class="form-control"
                                     value="0" min="0" max="20" required />
                             </div>
                         </div>
@@ -306,18 +447,6 @@
                             </div>
                         </div>
                         <div class="row mb-2">
-                            <label for="selectEquipment_feet" class="col-md-2 col-form-label" data-i18n="characterItemsUtil.feet">Feet</label>
-                            <div class="col-md-6">
-                                <select id="selectEquipment_feet" class="form-select">
-                                    <option value="" data-i18n="characterSelectPage.slots.empty">Empty</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <input type="number" id="inputEquipmentEnhancementLevel_feet" class="form-control"
-                                    value="0" min="0" max="20" required />
-                            </div>
-                        </div>
-                        <div class="row mb-2">
                             <label for="selectEquipment_hands" class="col-md-2 col-form-label" data-i18n="characterItemsUtil.hands">Hands</label>
                             <div class="col-md-6">
                                 <select id="selectEquipment_hands" class="form-select">
@@ -330,38 +459,14 @@
                             </div>
                         </div>
                         <div class="row mb-2">
-                            <label for="selectEquipment_ring" class="col-md-2 col-form-label" data-i18n="characterItemsUtil.ring">Ring</label>
+                            <label for="selectEquipment_feet" class="col-md-2 col-form-label" data-i18n="characterItemsUtil.feet">Feet</label>
                             <div class="col-md-6">
-                                <select id="selectEquipment_ring" class="form-select">
+                                <select id="selectEquipment_feet" class="form-select">
                                     <option value="" data-i18n="characterSelectPage.slots.empty">Empty</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <input type="number" id="inputEquipmentEnhancementLevel_ring" class="form-control"
-                                    value="0" min="0" max="20" required />
-                            </div>
-                        </div>
-                        <div class="row mb-2">
-                            <label for="selectEquipment_weapon" class="col-md-2 col-form-label" data-i18n="characterItemsUtil.mainHand">Weapon</label>
-                            <div class="col-md-6">
-                                <select id="selectEquipment_weapon" class="form-select">
-                                    <option value="" data-i18n="characterSelectPage.slots.empty">Empty</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <input type="number" id="inputEquipmentEnhancementLevel_weapon" class="form-control"
-                                    value="0" min="0" max="20" required />
-                            </div>
-                        </div>
-                        <div class="row mb-2">
-                            <label for="selectEquipment_off_hand" class="col-md-2 col-form-label" data-i18n="characterItemsUtil.offHand">Offhand</label>
-                            <div class="col-md-6">
-                                <select id="selectEquipment_off_hand" class="form-select">
-                                    <option value="" data-i18n="characterSelectPage.slots.empty">Empty</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <input type="number" id="inputEquipmentEnhancementLevel_off_hand" class="form-control"
+                                <input type="number" id="inputEquipmentEnhancementLevel_feet" class="form-control"
                                     value="0" min="0" max="20" required />
                             </div>
                         </div>
@@ -386,6 +491,42 @@
                             </div>
                             <div class="col-md-4">
                                 <input type="number" id="inputEquipmentEnhancementLevel_back" class="form-control"
+                                    value="0" min="0" max="20" required />
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label for="selectEquipment_neck" class="col-md-2 col-form-label" data-i18n="characterItemsUtil.neck">Neck</label>
+                            <div class="col-md-6">
+                                <select id="selectEquipment_neck" class="form-select">
+                                    <option value="" data-i18n="characterSelectPage.slots.empty">Empty</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="number" id="inputEquipmentEnhancementLevel_neck" class="form-control"
+                                    value="0" min="0" max="20" required />
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label for="selectEquipment_ring" class="col-md-2 col-form-label" data-i18n="characterItemsUtil.ring">Ring</label>
+                            <div class="col-md-6">
+                                <select id="selectEquipment_ring" class="form-select">
+                                    <option value="" data-i18n="characterSelectPage.slots.empty">Empty</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="number" id="inputEquipmentEnhancementLevel_ring" class="form-control"
+                                    value="0" min="0" max="20" required />
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label for="selectEquipment_earrings" class="col-md-2 col-form-label" data-i18n="characterItemsUtil.earrings">Earrings</label>
+                            <div class="col-md-6">
+                                <select id="selectEquipment_earrings" class="form-select">
+                                    <option value="" data-i18n="characterSelectPage.slots.empty">Empty</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="number" id="inputEquipmentEnhancementLevel_earrings" class="form-control"
                                     value="0" min="0" max="20" required />
                             </div>
                         </div>
@@ -545,21 +686,11 @@
                         </div>
                         <div class="row pt-3">
                             <div class="col-md-auto">
-                                <button id="buttonPatchNotes" class="btn btn-primary" type="button"
-                                    data-bs-toggle="modal" data-bs-target="#patchNotesModal" data-i18n="common:patchNotes">
-                                    Patch Notes
-                                </button>
-                            </div>
-                        </div>
-                        <div class="row pt-3">
-                            <div class="col-md-auto">
                                 <button id="buttonWipeEvents" class="btn btn-primary" type="button"
                                     data-bs-toggle="modal" data-bs-target="#WipeEventsModal" data-i18n="common:WipeEvents">
                                     Wipe Events
                                 </button>
                             </div>
-                        </div>
-                        <div class="row pt-3">
                             <div class="col-md-auto">
                                 <button id="buttonExperimentalFeatures" class="btn btn-primary" type="button"
                                     data-bs-toggle="modal" data-bs-target="#ExperimentalFeaturesModal" data-i18n="common:Experiment.ExperimentalFeatures">
@@ -728,13 +859,15 @@
                                 </button>
                             </div>
                             <div class="col-md-auto">
-                                <div data-i18n="common:controls.darkMode">
-                                Dark Mode:
+                                <div class="btn-group" role="group" aria-label="Dark Mode">
+                                    <label class="btn btn-light mb-0 d-flex align-items-center justify-content-center"
+                                        for="darkModeToggle">
+                                        <input type="checkbox" id="darkModeToggle"
+                                            style="width: 1.25em; height: 1.25em; margin: 0; cursor: pointer;">
+                                    </label>
+                                    <span class="btn btn-primary" style="cursor: default;"
+                                        data-i18n="common:controls.darkMode">Dark Mode</span>
                                 </div>
-                                <label class="switch">
-                                    <input type="checkbox" id="darkModeToggle">
-                                    <span class="slider round"></span>
-                                </label>
                             </div>
                         </div>
                         <div class="row mb-2 pt-3">
@@ -745,8 +878,6 @@
                                 </button>
                             </div>
                         </div>
-                        <label for="comboBox">Select an Character: </label>
-                        <select id = "profile-combo-container"></select>
                         <!-- #endregion -->
                     </div>
                 </div>
@@ -1088,7 +1219,7 @@
                     </div>
                     <div class="col-md-7" id="simulationResultColumn2">
                         <div class="row">
-                            <b data-i18n="common:simulationResults.damageDoneTotal">Damage Done (Total)</b>
+                            <b><span data-i18n="common:simulationResults.damageDoneTotal">Damage Done (Total)</span><span id="damageDoneTeamShare" class="ms-1 d-none"></span></b>
                         </div>
                         <div class="row">
                             <div class="col-md-5"><b data-i18n="common:simulationResults.source">Source</b></div>
@@ -1108,7 +1239,16 @@
                         </div>
                         <div id="simulationResultTotalDamageTaken" class="mb-2"></div>
                         <div class="row pt-2">
+                            <b><span data-i18n="common:revenue">Revenue</span>: <span id="revenuePreview"></span></b>
+                        </div>
+                        <div class="row pt-2">
+                            <b><span data-i18n="common:expense">Expenses</span>: <span id="expensesPreview"></span></b>
+                        </div>
+                        <div class="row pt-2">
                             <b><span data-i18n="common:profit">Profit</span>: <span id="profitPreview"></span></b>
+                        </div>
+                        <div class="row pt-2">
+                            <b><span data-i18n="common:noRNGRevenue">No RNG Revenue</span>: <span id="noRngRevenuePreview"></span></b>
                         </div>
                         <div class="row pt-2">
                             <b><span data-i18n="common:noRNGProfit">No RNG Profit</span>: <span id="noRngProfitPreview"></span></b>
@@ -1117,28 +1257,17 @@
                             <b><span data-i18n="common:afterTaxNoRNGProfit">After-Tax Expected Profit</span>: <span id="noRngAfterTaxProfitPreview"></span></b>
                         </div>
                         <div class="row pt-2">
-                            <b data-i18n="common:dropTotal">Drops (Total)</b>
+                            <b data-i18n="common:dropDetails">Drop Details</b>
                         </div>
-                        <div class="row" id="simulationResultDrops"></div>
-                        <div class="row pt-2 d-none" id="noRngDropsAccordion">
-                            <div class="col">
-                                <div class="accordion">
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header">
-                                            <button id="buttonNoRngDropsAccordion" class="accordion-button collapsed"
-                                                type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapseNoRngDrops" style="padding: 0.5em">
-                                                <b data-i18n="common:noRNGDrops">No RNG Drops</b>
-                                            </button>
-                                        </h2>
-                                        <div id="collapseNoRngDrops" class="accordion-collapse collapse">
-                                            <div class="accordion-body">
-                                                <div id="noRngDrops"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div id="dropDetailContent">
+                            <div class="row">
+                                <div class="col-md-4"><b data-i18n="marketplacePanel.item">Item</b></div>
+                                <div class="col-md-2 text-end"><b data-i18n="common:expectedQuantity">Expected Amount</b></div>
+                                <div class="col-md-2 text-end"><b data-i18n="common:dropQuantity">Drop Amount</b></div>
+                                <div class="col-md-2 text-end"><b id="dropDetailPriceHeader" data-i18n="marketplacePanel.price">Price</b></div>
+                                <div class="col-md-2 text-end"><b data-i18n="common:total">Total</b></div>
                             </div>
+                            <div id="dropDetailRows"></div>
                         </div>
                     </div>
                     <!-- #endregion -->
@@ -1169,7 +1298,7 @@
     </div>
     <div class="modal" id="triggerModal" tabindex="-1">
         <!-- #region Trigger Modal -->
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Configure Trigger</h5>
@@ -1346,7 +1475,7 @@
     </div>
     <div class="modal" id="equipmentSetsModal" tabindex="-1">
         <!-- #region Equipment Sets Modal -->
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" data-i18n="common:controls.equipmentSets">Equipment Sets</h5>
@@ -1377,7 +1506,7 @@
     </div>
     <div class="modal" id="startSimulationModal" tabindex="-1">
         <!-- #region Start Simulation Modal -->
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" data-i18n="common:simulationSettings">Simulation Settings</h5>
@@ -1620,7 +1749,7 @@
     </div>
     <div class="modal" id="allSimsModal" tabindex="-1">
         <!-- #region Start Simulation Modal -->
-        <div class="modal-dialog" style="width: 100%; max-width: 1800px;">
+        <div class="modal-dialog modal-dialog-scrollable" style="width: 100%; max-width: 1800px;">
             <div class="modal-content">
                 <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
                     <h5 class="modal-title" style="margin: 0;" data-i18n="common:simulateAllZonesResults">Simulate All Zones Results</h5>
@@ -1637,7 +1766,9 @@
                                 <th data-i18n="party.difficulty">Difficulty Tier</th>
                                 <th data-i18n="common:player">Player</th>
                                 <th data-i18n="common:simulationResults.encounters">Encounters</th>
+                                <th data-i18n="common:simulationResults.teamDamageShareColumn">Team Damage Share</th>
                                 <th data-i18n="common:simulationResults.deathPerHour">Deaths</th>
+                                <th data-i18n="common:simulationResults.ranOutOfManaRatio">Mana Run Out Ratio</th>
                                 <th data-i18n="common:simulationResults.totalExperience">Total Experience</th>
                                 <th data-i18n="skillNames./skills/stamina">Stamina</th>
                                 <th data-i18n="skillNames./skills/intelligence">Intelligence</th>
@@ -1666,7 +1797,7 @@
     </div>
     <div class="modal" id="errorModal" tabindex="-1">
         <!-- #region Error Modal -->
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Error</h5>
@@ -1686,7 +1817,7 @@
     </div>
     <div class="modal" id="importExportModal" tabindex="-1">
         <!-- #region Error Modal -->
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" data-i18n="common:immportexportSet">Import / Export Set</h5>
@@ -1731,7 +1862,7 @@
     </div>    
         <!-- Wipe Events Modal -->
     <div class="modal fade" id="WipeEventsModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" data-i18n="common:WipeEvents">Wipe Events</h5>
@@ -1775,7 +1906,7 @@
     </div>
         <div class="modal" id="ExperimentalFeaturesModal" tabindex="-1">
         <!-- #region Patch Notes Modal -->
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" data-i18n="common:Experiment.ExperimentalFeatures">Experimental Features</h5>
@@ -1851,7 +1982,7 @@
     </div>
     <div class="modal" id="patchNotesModal" tabindex="-1">
         <!-- #region Patch Notes Modal -->
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" data-i18n="common:patchNotes">Patch Notes</h5>
@@ -1859,12 +1990,16 @@
                 </div>
                 <div class="modal-body">
                     <div class="container-fluid">
-                        <div class="row" id="patchNotes">
+                        <div class="row patch-notes-layout">
+                            <div class="col-auto ps-1 pe-0">
+                                <div id="patchNotesTimeline" class="patch-notes-timeline"></div>
+                            </div>
+                            <div class="col">
+                                <div class="row" id="patchNotes">
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="common:controls.close">Close</button>
                 </div>
             </div>
         </div>
@@ -1872,7 +2007,7 @@
     </div>
     <div class="modal" id="editPricesModal" tabindex="-1">
         <!-- #region Prices Modal -->
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" data-i18n="common:editPrices">Edit Prices</h5>
@@ -1883,6 +2018,9 @@
                         <div class="row">
                             <div class="col-12 mb-4">
                                 <h3><span data-i18n="common:profit">Profit</span>: <span id="profitSpan"></span></h3>
+                            </div>
+                            <div class="col-12 mb-4">
+                                <h3><span data-i18n="common:expense">Expenses</span>: <span id="expensesSummarySpan"></span></h3>
                             </div>
                             <div class="col-12 mb-4">
                                 <h3><span data-i18n="common:noRNGProfit">No RNG Profit</span>: <span id="noRngProfitSpan"></span></h3>
@@ -1941,7 +2079,7 @@
     </div>
     <div class="modal" id="houseRoomsModal" tabindex="-1">
         <!-- #region House Rooms Modal -->
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" data-i18n="characterManagement.house">House Rooms</h5>
@@ -1961,7 +2099,7 @@
     </div>
     <div class="modal" id="achievementsModal" tabindex="-1">
         <!-- #region Achievements Modal -->
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" data-i18n="achievementsPanel.achievements">Achievements</h5>
@@ -1981,7 +2119,7 @@
     </div>
     <div class="modal" id="shrinesModal" tabindex="-1">
         <!-- #region Shrines Modal -->
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" data-i18n="characterManagement.shrine">Shrines</h5>

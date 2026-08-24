@@ -1,6 +1,18 @@
-# CLAUDE.md
+# AGENTS.md — AI 协作通用指导
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+本文件面向所有 AI 编码助手（Claude Code、Codex、Cursor 等），是仓库的**通用工程约定**，内容与具体业务功能无关。
+
+> **关于功能改造说明**：各仓库的 `MODIFICATIONS.md` 记录该仓库相对上游的**功能改造细节**，可作为参考；业务描述以对应仓库的 `MODIFICATIONS.md` 为准。面向用户的更新日志统一记录在各仓库的 `patchNote.json`。
+
+## Changelog 约定（必须遵守）
+
+- **每次代码改动完成后，必须在根目录 `patchNote.json` 追加记录**（该文件同时是页面"更新日志"弹窗的数据源）。
+- 用**面向用户的语言**描述改动效果——用户能感知到什么变化，而不是内部实现。
+- 语言简练，一条改动一行；不写内部文件名、函数名等技术细节。
+- 结构：顶层 key 是日期分组（`YYYY年M月D日`，倒序，新分组放最上方）；数组元素支持两种格式：
+  - 字符串：历史遗留格式（作者直接写在文本里 ` by xxx`）；
+  - 对象（推荐）：`{ "text": "用户可感知的改动描述", "author": "作者名" }`。
+- 纯文档类改动（如本文件、README）可不记录。
 
 ## 项目简介
 
@@ -58,38 +70,17 @@ index.html + src/main.js        UI 主线程：收集表单 → postMessage 给 
 - **i18n**：i18next。`index.html` 从 CDN 加载 i18next 本体，实际文案在 `js/i18n.js`（内联、约 12k 行，`const Wa = { en: {...}, zh: {...} }`）；`locales/en|zh/common.json` 也存在但以 `js/i18n.js` 为主。
 - **玩家配置格式**：主线程 `playerDataMap` 里存的是 JSON 字符串（`{player, food, drinks, abilities, triggerMap, zone, simulationTime, houseRooms, achievements, shrines}`），worker 端 `Player.createFromDTO` 再解析。
 - **buff 类型体系**：所有加成都是 `Buff` 对象（`typeHrid` + `ratioBoost` + `flatBoost`），经 `combatUnit.addPermanentBuff` 按 `typeHrid` 聚合进 `permanentBuffs`，在 `updateCombatDetails` 里用 `getBuffBoost(type)` / `getBuffBoosts(type)` 消费。**字段语义因类型而异**（取决于引擎算法）：
-  - `ratioBoost`（百分比乘）：`damage`、`attack_speed`、`max_hitpoints` / `max_manapoints`（神龛新增）
+  - `ratioBoost`（百分比乘）：`damage`、`attack_speed`、`max_hitpoints` / `max_manapoints`
   - `flatBoost`（直接加）：`cast_speed`、`rare_find`、`wisdom`、`stamina_level` / `intelligence_level`（加等级）
   - 加新 buff 类型前，先到 `combatUnit.updateCombatDetails` 看目标属性是被 ratioBoost 还是 flatBoost 消费。
 - `package.json` 里 `"mwicombatsimulator": "file:"` 是自引用占位依赖，可忽略。
 
-## 神龛（Shrine，本次二开新增）
+## 改动定位指南
 
-与房屋（houseRooms）/成就（achievements）并列的第三类永久加成，数据流完全一致（main.js UI → DTO → worker `createFromDTO` → `combatUnit.generatePermanentBuffs`）。
-
-- 新增文件：`src/combatsimulator/data/shrineDetailMap.json`（数据）、`src/combatsimulator/shrine.js`（`Shrine` 类，参考 `houseRoom.js`）。
-- 5 个神龛及 buff 类型：
-
-| 神龛 | 加成 | buff 类型（每级） |
-|---|---|---|
-| 力量 power | 伤害 | `damage` ratioBoost 0.003 |
-| 节奏 rhythm | 攻击速度 / 施法速度 | `attack_speed` ratioBoost 0.004 / `cast_speed` flatBoost 0.004 |
-| 精神 spirit | 最大 HP / 最大 MP | `max_hitpoints` / `max_manapoints` ratioBoost 0.01 |
-| 稀有 rare | 稀有发现 | `rare_find` flatBoost 0.015 |
-| 学者 scholar | 经验 | `wisdom` flatBoost 0.005 |
-
-- 精神神龛用的 `max_hitpoints` / `max_manapoints` 是**本次新增**的 buff 类型（原引擎没有），处理在 `combatUnit.updateCombatDetails` 的 HP/MP 公式里：`(1 + maxHitpointsRatio + ratioBoost)`。
-- UI：`index.html` 的 `#buttonShrinesModal` 按钮 + `#shrinesModal` 弹窗；`main.js` 的 `initShrinesModal()`；i18n 的 `shrineNames.*` / `characterManagement.shrine`。
-
-## 收益计算与税率
-
-- 收益 = Σ(掉落数量 × 单价)，单价三种来源（`main.js` `resolveItemPrice`，原 `showDrops` 处的重复取价代码已抽成此函数）：`bid`（BO 买价，掉落默认）/ `ask`（SO 卖价）/ `vendor`（NPC 回收价 = `itemDetailMap[item].sellPrice`）。
-- 价格由 `fetchPrices()` 从 `https://www.milkywayidle.com/game_data/marketplace.json` 拉取，存 `window.prices = {ask, bid, vendor}`。
-- **市场税 5%**：`main.js` 顶部 `MARKET_TAX_RATE = 0.05`（改税率只动这一个常量，注释在常量处）。收益展示分两层：
-  - 税前数字（利润/期望利润）保持不变；
-  - 新增"税后期望利润"= 税后期望收入 − 支出，显示在结果页"期望利润"下方和改价弹窗里（i18n key `common:afterTaxNoRNGProfit`）。
-- **免税规则**（`getTaxFactor()`）：① 直接掉落的金币 `/items/coin`；② 按 vendor 回收价成交的；③ 地下城（`isDungeon`）和迷宫（`isLabyrinth`）产出。其余按市场单价 × (1 - MARKET_TAX_RATE)。
-- 计算点共 3 处（都已接入）：`getDropProfit`（汇总表）、`showKills`（改价弹窗两张收益表，每行 `<tr data-tax-factor>` 记录税后系数）、手动改价的 input 监听（按行系数重算税后总额）。
+- 改**战斗数值/机制** → 动 `src/combatsimulator/`，改完 `npm run build` 后刷新页面即可。
+- 改**UI / 表单 / 结果展示** → 动 `index.html` 和 `src/main.js`。
+- 新增**怪物 / 装备 / 技能数据** → 先看 `src/combatsimulator/data/` 里对应 JSON 的结构，再按相同 schema 增补；worker 和主线程都会 `import` 这些 JSON（webpack 打包进 bundle）。
+- 涉及多线程：主线程和 worker 之间只传可序列化的 DTO（用 `structuredClone` 拷贝），不要传函数/类实例。
 
 ## 发布与部署（GitHub Pages）
 
@@ -97,7 +88,7 @@ index.html + src/main.js        UI 主线程：收集表单 → postMessage 给 
 
 - **发布前先 `npm run build` 并提交 `dist/`** —— dist 被 git 追踪，Pages 发布的就是它。
 - Pages 配置：仓库 Settings → Pages → Source 选 `Deploy from a branch` → Branch 选 `testing`、目录选 `/ (root)`（**不是 /docs**）。
-- webpack 未设 `publicPath`（默认 auto），配合 `index.html` 相对路径引用，所以能直接跑在 `/dist/` 子路径下，无需改 base。
+- webpack 已设相对路径 `publicPath`，配合 `index.html` 相对引用，可直接跑在 `/dist/` 子路径下，无需改 base。
 - remote 指向自有仓库 `https://github.com/aiwwb/milkywayidle_battle.git`。
 
 ### git 代理（坑）
@@ -107,19 +98,7 @@ index.html + src/main.js        UI 主线程：收集表单 → postMessage 给 
 - 排查：`git config --list --show-origin | grep proxy`，注意 **local `.git/config` 会覆盖 global**。
 - 解决：把代理协议改成 http，GCM 才能用。本项目已在 `.git/config` 配 `http.proxy = http://127.0.0.1:10808`（仅 local，不影响其他仓库）。
 
-## 第三方集成
-
-- **访问量统计（Vercount，原不蒜子 busuanzi 的替身）**：`index.html` 引入 `https://events.vercount.one/js`（不蒜子官方服务已 404 停摆，2026-08 换成 Vercount），`<footer>` 里仍用 `#busuanzi_value_site_pv` / `#busuanzi_value_site_uv` 显示站点总访问量 / 访客数（Vercount 兼容 busuanzi 标签并自动同步其历史数据）。
-  - 统计粒度按**域名**（整个 `aiwwb.github.io`），不是按仓库——若以后在同域名下新增 Pages 项目会共享计数器。
-  - 加载失败时 footer 那行保持隐藏。
-
-## 二开提示
-
-- 改**战斗数值/机制** → 动 `src/combatsimulator/`，改完 `npm run build` 后刷新页面即可。
-- 改**UI / 表单 / 结果展示** → 动 `index.html` 和 `src/main.js`。
-- 新增**怪物 / 装备 / 技能数据** → 先看 `src/combatsimulator/data/` 里对应 JSON 的结构，再按相同 schema 增补；worker 和主线程都会 `import` 这些 JSON（webpack 打包进 bundle）。
-- 涉及多线程：主线程和 worker 之间只传可序列化的 DTO（用 `structuredClone` 拷贝），不要传函数/类实例。
-
 ## 协作约定
 
-- 代码改动由 Claude 完成并 commit；**push 不由 Claude 执行**，而是由 Claude 给出 `git push` 命令，用户手动执行（push 涉及本机认证/代理，用户手动点授权更稳妥）。
+- 代码改动由 AI 完成并 commit；**push 不由 AI 执行**，而是给出 `git push` 命令，用户手动执行（push 涉及本机认证/代理，用户手动点授权更稳妥）。
+- **git commit 内容必须干净**：只允许简洁的提交信息和作者，禁止塞入任何无关信息——包括但不限于 `Co-Authored-By`、`Generated with xxx` 等 AI 署名/工具尾注、空行分隔的推广语、链接等。提交信息一行说清改了什么即可。

@@ -13,6 +13,7 @@
     "getPrices": "Get Prices",
     "editPrices": "Edit Prices",
     "patchNotes": "Patch Notes",
+    "perDay": "/day",
     "calcEPHProfit": "Calc EPH Profit",
     "controls": {
         "title": "Controls",
@@ -42,6 +43,9 @@
     "revenue": "Revenue",
     "noRNGRevenue": "No RNG Revenue",
     "dropTotal": "Drops (Total)",
+    "dropDetails": "Drop Details",
+    "dropQuantity": "Drop Amount",
+    "expectedQuantity": "Expected Amount",
     "noRNGDrops": "No RNG Drops",
     "simulationResults": {
         "title": "Simulation Results",
@@ -57,6 +61,8 @@
         "Yes": "Yes",
         "No": "No",
         "ranOutOfManaRatio": "Mana Run Out Ratio",
+        "teamDamageShareColumn": "Team Damage Share",
+        "teamDamageShare": "(Team damage share: {{percent}}%)",
         "healthRestoredPerSecond": "Health Restored Per Second",
         "manaRestoredPerSecond": "Mana Restored Per Second",
         "damageDoneTotal": "Damage Done (Total)",

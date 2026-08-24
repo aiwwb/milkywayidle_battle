@@ -14,6 +14,11 @@ module.exports = {
   },
   mode: 'development',
   devtool: 'source-map',
+  module: {
+    rules: [
+      { test: /\.md$/i, type: 'asset/source' },
+    ],
+  },
   devServer: {
     static: {
       directory: path.join(__dirname, 'dist'),

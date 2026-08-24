@@ -11,15 +11,15 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/AmVoidGuy/MWICombatSimulator.git"
+        "url": "git+https://github.com/aiwwb/milkywayidle_battle.git"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/AmVoidGuy/MWICombatSimulator/issues"
+        "url": "https://github.com/aiwwb/milkywayidle_battle/issues"
     },
-    "homepage": "https://github.com/AmVoidGuy/MWICombatSimulator#readme",
+    "homepage": "https://github.com/aiwwb/milkywayidle_battle#readme",
     "devDependencies": {
         "copy-webpack-plugin": "^12.0.2",
         "webpack": "^5.93.0",
