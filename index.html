@@ -3,13 +3,83 @@
 
 <head>
     <style>
-        .form-control {
-            min-width: 3.60rem
+        /* ===== 主题变量体系（浅色默认，深色模式切换变量值即可全局生效） ===== */
+        :root {
+            --bg: #ffffff;
+            --surface: #ffffff;
+            --surface-alt: #f8f9fa;
+            --border: #dee2e6;
+            --text: #212529;
+            --text-muted: #6c757d;
+            --input-bg: #ffffff;
+            --input-border: #ced4da;
+            --chart-bg: #f8f9fa;
+            --accent: #0d6efd;
         }
 
         body.dark-mode {
-            background-color: #333;
-            color: #f0f0f0;
+            --bg: #333333;
+            --surface: #444444;
+            --surface-alt: #3a3a3a;
+            --border: #555555;
+            --text: #f0f0f0;
+            --text-muted: #adb5bd;
+            --input-bg: #444444;
+            --input-border: #999999;
+            --chart-bg: #1e1e1e;
+            --accent: #4da3ff;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        /* 深色模式下 body 背景/文字必须显式指定（变量在 body 上，body 自身的样式仍需读取） */
+        body.dark-mode {
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        /* ===== 主体三大列：卡片化容器（深浅色统一走变量） ===== */
+        .container-fluid > .row.pt-3:first-of-type > [class*="col-md-"] {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        body.dark-mode .container-fluid > .row.pt-3:first-of-type > [class*="col-md-"] {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+        }
+
+        /* 结果展示区（Simulation Results）：复用卡片外观 */
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        body.dark-mode .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+        }
+
+        /* 卡片内部分组标题：统一字号 */
+        .container-fluid > .row.pt-3:first-of-type > [class*="col-md-"] > b,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) > b {
+            display: block;
+            font-size: 0.95rem;
+            color: var(--text);
+            letter-spacing: 0.2px;
+        }
+
+        .form-control {
+            min-width: 3.60rem
         }
 
         /* ===== 顶部 Header 导航条 ===== */
@@ -39,6 +109,13 @@
         .app-version {
             font-size: 0.7rem;
             vertical-align: middle;
+            background-color: rgba(255, 255, 255, 0.18);
+            color: #f1f5f9;
+        }
+
+        body.dark-mode .app-version {
+            background-color: rgba(255, 255, 255, 0.12);
+            color: #f1f5f9;
         }
 
         body.dark-mode header.app-header {
@@ -82,16 +159,166 @@
         body.dark-mode .accordion-collapse,
         body.dark-mode .modal-content,
         body.dark-mode textarea {
-            background-color: #444;
-            color: #f0f0f0;
-            border: 1px solid #999;
-            /* Add other relevant styles for form controls in dark mode */
+            background-color: var(--input-bg);
+            color: var(--text);
+            border: 1px solid var(--input-border);
+        }
+
+        /* 深色模式：文本类元素（标签/段落/标题/分组标题/结果值）跟随变量 */
+        body.dark-mode label,
+        body.dark-mode .col-form-label,
+        body.dark-mode b,
+        body.dark-mode strong,
+        body.dark-mode p,
+        body.dark-mode .form-check-label,
+        body.dark-mode .container-fluid {
+            color: var(--text);
+        }
+
+        /* 深色模式：Combat Stats 数值列（id="combatStat_*"）统一清晰 */
+        body.dark-mode [id^="combatStat_"] {
+            color: var(--text);
+        }
+
+        /* 深色模式：Player 标签页（nav-tabs）适配 */
+        body.dark-mode .nav-tabs {
+            border-bottom-color: var(--border);
+        }
+
+        body.dark-mode .nav-tabs .nav-link {
+            color: var(--text-muted);
+            background-color: transparent;
+            border-color: transparent;
+        }
+
+        body.dark-mode .nav-tabs .nav-link:hover {
+            color: var(--text);
+            border-color: var(--border) var(--border) transparent;
+        }
+
+        body.dark-mode .nav-tabs .nav-link.active {
+            color: var(--text);
+            background-color: var(--surface);
+            border-color: var(--border) var(--border) var(--surface);
+        }
+
+        /* 深色模式：按钮色调降饱和，避免在深底上刺眼 */
+        body.dark-mode .btn-primary {
+            background-color: #2b5da3;
+            border-color: #2b5da3;
+            color: #ffffff;
+        }
+
+        body.dark-mode .btn-primary:hover,
+        body.dark-mode .btn-primary:focus {
+            background-color: #3468b8;
+            border-color: #3468b8;
+            color: #ffffff;
+        }
+
+        body.dark-mode .btn-primary:disabled,
+        body.dark-mode .btn-primary.disabled {
+            background-color: #1e3a63;
+            border-color: #1e3a63;
+            color: #9aa5b1;
+        }
+
+        body.dark-mode .btn-danger {
+            background-color: #8a2a2a;
+            border-color: #8a2a2a;
+            color: #ffffff;
+        }
+
+        body.dark-mode .btn-danger:hover,
+        body.dark-mode .btn-danger:focus {
+            background-color: #a13535;
+            border-color: #a13535;
+            color: #ffffff;
+        }
+
+        /* secondary 实色按钮（弹窗「关闭」类）跟随变量 */
+        body.dark-mode .btn-secondary {
+            background-color: var(--input-border);
+            border-color: var(--input-border);
+            color: var(--text);
+        }
+
+        body.dark-mode .btn-secondary:hover,
+        body.dark-mode .btn-secondary:focus {
+            background-color: var(--text-muted);
+            border-color: var(--text-muted);
+            color: var(--bg);
+        }
+
+        /* outline-secondary（如深色模式开关）：深色下用更柔和的边框/文字 */
+        body.dark-mode .btn-outline-secondary {
+            color: var(--text);
+            border-color: var(--input-border);
+            background-color: transparent;
+        }
+
+        body.dark-mode .btn-outline-secondary:hover,
+        body.dark-mode .btn-outline-secondary:focus {
+            color: var(--text);
+            background-color: var(--surface-alt);
+            border-color: var(--input-border);
+        }
+
+        /* 深色模式：表单控件通用（type="text"/"search"/"password" 等跟随 input-bg） */
+        body.dark-mode input[type="text"],
+        body.dark-mode input[type="search"],
+        body.dark-mode input[type="password"],
+        body.dark-mode input[type="email"],
+        body.dark-mode input[type="url"],
+        body.dark-mode .form-control {
+            background-color: var(--input-bg);
+            color: var(--text);
+            border-color: var(--input-border);
+        }
+
+        body.dark-mode .form-control:focus {
+            background-color: var(--input-bg);
+            color: var(--text);
+            border-color: var(--accent);
+        }
+
+        /* 深色模式：弹窗 header/footer 边框 */
+        body.dark-mode .modal-header,
+        body.dark-mode .modal-footer {
+            border-color: var(--border);
+        }
+
+        body.dark-mode .modal-title {
+            color: var(--text);
+        }
+
+        /* 深色模式：弹窗关闭按钮（X）适配 */
+        body.dark-mode .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+            opacity: 0.8;
+        }
+
+        /* 深色模式：弹窗内的 nav-pills（导入导出「组队/单人」切换） */
+        body.dark-mode .nav-pills .nav-link {
+            color: var(--text-muted);
+            background-color: var(--surface-alt);
+        }
+
+        body.dark-mode .nav-pills .nav-link.active,
+        body.dark-mode .nav-pills .show > .nav-link {
+            color: #ffffff;
+            background-color: var(--accent);
+        }
+
+        body.dark-mode input[type="number"]::placeholder,
+        body.dark-mode textarea::placeholder {
+            color: var(--text-muted);
         }
 
         body.dark-mode #expensesTable,
         body.dark-mode #revenueTable,
         body.dark-mode #noRngRevenueTable {
-            color: #f0f0f0;
+            color: var(--text);
         }
 
         #allZonesData {
@@ -102,7 +329,7 @@
         #allZonesData th, #allZonesData td {
             min-width: 90px; 
             padding: 8px;
-            border: 1px solid #ddd; 
+            border: 1px solid var(--border); 
         }
 
         .modal-body {
@@ -110,10 +337,10 @@
         }
 
         #allZonesData th {
-        cursor: pointer; 
-        position: relative;
-        padding: 10px;
-        background-color: #f8f9fa; 
+            cursor: pointer; 
+            position: relative;
+            padding: 10px;
+            background-color: var(--surface-alt); 
         }
 
         #allZonesData th:not(:nth-child(-n+2)) {
@@ -121,8 +348,8 @@
         }
 
         #allZonesData th:not(:nth-child(-n+2)):hover {
-            background-color: #e9ecef; 
-            color: #000; 
+            background-color: var(--border); 
+            color: var(--text); 
         }
 
         #allZonesData td:not(:nth-child(-n+2)) {
@@ -141,24 +368,45 @@
 
         body.dark-mode #allZonesData th,
         body.dark-mode #allZonesData td {
-            border: 1px solid #555; 
+            border: 1px solid var(--border); 
             padding: 8px; 
         }
 
         body.dark-mode #allZonesData th {
-            background-color: #444; 
+            background-color: var(--surface); 
         }
 
         body.dark-mode .card {
-            background-color: #444;
-            color: #f0f0f0;
+            background-color: var(--surface);
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        .card-header {
+            background-color: var(--surface-alt);
+            border-bottom-color: var(--border);
+            color: var(--text);
         }
 
         .outlined-box {
-            border: 1px solid #ccc; /* Border color */
-            border-radius: 4px; /* Rounded corners */
-            padding: 15px; /* Padding inside the box */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional shadow for better visibility */
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* HP/MP 图表容器：深浅色跟随变量 */
+        .chart-panel {
+            background-color: var(--chart-bg);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        /* 页脚 */
+        footer.site-footer {
+            color: var(--text-muted);
+            background-color: transparent;
         }
 
         /* 全局统一滚动条样式（页面、弹窗及任何可滚动区域自动生效） */
@@ -321,7 +569,7 @@
             <div class="d-flex align-items-center gap-2">
                 <span class="app-logo" aria-hidden="true"></span>
                 <span class="app-title">MWI Combat Simulator</span>
-                <span class="badge rounded-pill text-bg-secondary app-version">v1.0.1</span>
+                <span class="badge rounded-pill app-version">v1.0.1</span>
             </div>
             <div class="d-flex align-items-center gap-2" id="headerRight">
                 <a class="btn btn-sm btn-outline-light" href="https://github.com/aiwwb/milkywayidle_battle"
@@ -1366,12 +1614,12 @@
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <div style="background-color: #1e1e1e; padding: 15px; border-radius: 5px;">
+                        <div class="chart-panel">
                             <canvas id="hpChart"></canvas>
                         </div>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <div style="background-color: #1e1e1e; padding: 15px; border-radius: 5px;">
+                        <div class="chart-panel">
                             <canvas id="mpChart"></canvas>
                         </div>
                     </div>
@@ -2227,20 +2475,21 @@
     <script src="bundle.js" type="module"></script>
     <!-- 访问量统计：Vercount（不蒜子替身，兼容 busuanzi_value_* 标签并自动同步其历史数据） -->
     <script defer src="https://events.vercount.one/js"></script>
+
+    <footer class="site-footer mt-4">
+        <div class="text-center">
+            <p>Credit to KuganDev, Vlad (mwisim) and AmVoidGuy<br>
+            </p>
+            <p>
+                <span id="busuanzi_container_site_pv" style="display:none">
+                    本站总访问量 <span id="busuanzi_value_site_pv"></span> 次
+                </span>
+                <span id="busuanzi_container_site_uv" style="display:none">
+                    访客数 <span id="busuanzi_value_site_uv"></span> 人
+                </span>
+            </p>
+        </div>
+    </footer>
 </body>
-<footer>
-    <div style="text-align: center;">
-        <p>Credit to KuganDev, Vlad (mwisim) and AmVoidGuy<br>
-        </p>
-        <p>
-            <span id="busuanzi_container_site_pv" style="display:none">
-                本站总访问量 <span id="busuanzi_value_site_pv"></span> 次
-            </span>
-            <span id="busuanzi_container_site_uv" style="display:none">
-                访客数 <span id="busuanzi_value_site_uv"></span> 人
-            </span>
-        </p>
-    </div>
-</footer>
 
 </html>
