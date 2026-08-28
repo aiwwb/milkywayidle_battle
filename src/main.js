@@ -5122,12 +5122,129 @@ darkModeToggle.addEventListener('click', () => {
     applyDarkMode();
 });
 
+// #region Combat Stats 折叠：默认只显示核心属性，其余折叠，点击「查看全部」展开
+const COMBAT_CORE_STATS = [
+    "maxHitpoints",
+    "maxManapoints",
+    "combatStyleHrid",
+    "damageType",
+    "attackInterval",
+    "stabAccuracyRating",
+    "stabMaxDamage",
+    "slashAccuracyRating",
+    "slashMaxDamage",
+    "smashAccuracyRating",
+    "smashMaxDamage",
+    "rangedAccuracyRating",
+    "rangedMaxDamage",
+    "magicAccuracyRating",
+    "magicMaxDamage",
+    "defensiveMaxDamage",
+    "totalArmor",
+    "totalWaterResistance",
+    "totalNatureResistance",
+    "totalFireResistance",
+    "lifeSteal",
+    "hpRegenPer10",
+    "mpRegenPer10",
+    "criticalRate",
+    "criticalDamage",
+    "attackSpeed"
+];
+
+function initCombatStatsCollapse() {
+    const statsColumn = document.querySelector('.container-fluid > .row.pt-3 > .col-md-2');
+    if (!statsColumn) return;
+
+    // 找到 Combat Stats 标题行，在其后插入展开/收起按钮
+    const titleRow = statsColumn.querySelector('b[data-i18n="equipmentPanel.combatStats"]');
+    if (!titleRow) return;
+
+    // 收集所有属性行（含 combatStat_ 值元素的 .row）
+    const statRows = Array.from(statsColumn.querySelectorAll('.row')).filter(row =>
+        row.querySelector('[id^="combatStat_"]')
+    );
+
+    // 标记非核心属性行为「扩展行」
+    statRows.forEach(row => {
+        const valueEl = row.querySelector('[id^="combatStat_"]');
+        const statKey = valueEl.id.replace('combatStat_', '');
+        if (!COMBAT_CORE_STATS.includes(statKey)) {
+            row.classList.add('combat-stat-extra');
+        }
+    });
+
+    // 标题行右侧插入切换按钮（含折叠箭头 + 计数）
+    const totalExtra = statRows.filter(r => r.classList.contains('combat-stat-extra')).length;
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.type = 'button';
+    toggleBtn.id = 'combatStatsToggle';
+    toggleBtn.className = 'combat-stats-toggle';
+    toggleBtn.setAttribute('aria-expanded', 'false');
+
+    const btnText = document.createElement('span');
+    btnText.className = 'combat-stats-toggle__text';
+    btnText.setAttribute('data-i18n', 'common:controls.showAllStats');
+    btnText.textContent = '查看全部属性'; // 中文 fallback，避免 i18n 未加载时显示空白
+
+    const btnCaret = document.createElement('span');
+    btnCaret.className = 'combat-stats-toggle__caret';
+    btnCaret.textContent = '\u25BE'; // ▾
+
+    toggleBtn.appendChild(btnText);
+    toggleBtn.appendChild(btnCaret);
+
+    // 把按钮放到标题行的容器里（标题 row 的 mb-3 那行）
+    const titleContainer = titleRow.closest('.row');
+    if (titleContainer) {
+        titleContainer.classList.add('d-flex', 'align-items-center', 'justify-content-between', 'gap-2');
+        titleRow.classList.add('flex-grow-1');
+        titleContainer.appendChild(toggleBtn);
+    }
+
+    // 如果 i18next 已经加载完成，同步翻译（否则由 updateContent 统一处理）
+    if (i18next && i18next.isInitialized) {
+        btnText.textContent = i18next.t('common:controls.showAllStats');
+    }
+
+    let expanded = false;
+    toggleBtn.addEventListener('click', () => {
+        expanded = !expanded;
+        statRows.forEach(row => {
+            if (row.classList.contains('combat-stat-extra')) {
+                row.classList.toggle('d-none', !expanded);
+            }
+        });
+        toggleBtn.setAttribute('aria-expanded', String(expanded));
+        btnText.textContent = expanded
+            ? i18next.t('common:controls.hideStats')
+            : i18next.t('common:controls.showAllStats');
+        btnCaret.textContent = expanded ? '\u25B4' : '\u25BE'; // ▴ / ▾
+        // 同步 data-i18n 让 updateContent 在语言切换时正确翻译
+        btnText.setAttribute('data-i18n', expanded
+            ? 'common:controls.hideStats'
+            : 'common:controls.showAllStats');
+    });
+
+    // 初始折叠
+    statRows.forEach(row => {
+        if (row.classList.contains('combat-stat-extra')) {
+            row.classList.add('d-none');
+        }
+    });
+}
+
+initCombatStatsCollapse();
+// #endregion
+
 function updateContent() {
     document.querySelectorAll('[data-i18n]').forEach(function (element) {
         const key = element.getAttribute('data-i18n');
-        if (key) {
-            element.textContent = i18next.t(key);
-        }
+        if (!key) return;
+        // 跳过自定义复合按钮（其 data-i18n 在子元素上，避免清空结构）
+        if (element.classList && element.classList.contains('combat-stats-toggle')) return;
+        element.textContent = i18next.t(key);
     });
 
     document.querySelectorAll('[data-i18n-placeholder]').forEach(function (element) {

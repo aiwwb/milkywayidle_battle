@@ -32,7 +32,9 @@
         "delete": "Delete",
         "create": "Create",
         "close": "Close",
-        "name": "Name"
+        "name": "Name",
+        "showAllStats": "Show all stats",
+        "hideStats": "Collapse"
     },
     "amount": "Amount",
     "total": "Total",

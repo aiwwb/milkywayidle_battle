@@ -82,6 +82,325 @@
             min-width: 3.60rem
         }
 
+        /* ===== 分组标题层级：左侧色条 + 加粗 ===== */
+        b[data-i18n="sharableProfile.skills"],
+        b[data-i18n="common:priceSettings.title"],
+        b[data-i18n="equipmentPanel.combatStats"],
+        b[data-i18n="characterManagement.abilities"],
+        b[data-i18n="common:simulationResults.title"],
+        b[data-i18n="common:simulationResults.killPerHour"],
+        b[data-i18n="common:simulationResults.timeSpentOnBoss"],
+        b[data-i18n="common:simulationResults.deathPerHour"],
+        b[data-i18n="common:simulationResults.xpPerHour"],
+        b[data-i18n="common:simulationResults.hpSpentPerHour"],
+        b[data-i18n="common:simulationResults.consumablesUsedPerHour"],
+        b[data-i18n="common:simulationResults.manaUsedPerHour"],
+        b[data-i18n="common:simulationResults.healthRestoredPerSecond"],
+        b[data-i18n="common:simulationResults.manaRestoredPerSecond"],
+        b[data-i18n="common:simulationResults.damageDoneTotal"],
+        b[data-i18n="common:simulationResults.damageTakenTotal"],
+        b[data-i18n="common:revenue"],
+        b[data-i18n="common:expense"],
+        b[data-i18n="common:profit"],
+        b[data-i18n="common:noRNGRevenue"],
+        b[data-i18n="common:noRNGProfit"],
+        b[data-i18n="common:afterTaxNoRNGProfit"],
+        b[data-i18n="common:dropDetails"] {
+            display: inline-block;
+            position: relative;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 0.3px;
+            padding-left: 10px;
+            margin-bottom: 6px;
+        }
+
+        b[data-i18n="sharableProfile.skills"]::before,
+        b[data-i18n="common:priceSettings.title"]::before,
+        b[data-i18n="equipmentPanel.combatStats"]::before,
+        b[data-i18n="characterManagement.abilities"]::before,
+        b[data-i18n="common:simulationResults.title"]::before,
+        b[data-i18n="common:simulationResults.killPerHour"]::before,
+        b[data-i18n="common:simulationResults.timeSpentOnBoss"]::before,
+        b[data-i18n="common:simulationResults.deathPerHour"]::before,
+        b[data-i18n="common:simulationResults.xpPerHour"]::before,
+        b[data-i18n="common:simulationResults.hpSpentPerHour"]::before,
+        b[data-i18n="common:simulationResults.consumablesUsedPerHour"]::before,
+        b[data-i18n="common:simulationResults.manaUsedPerHour"]::before,
+        b[data-i18n="common:simulationResults.healthRestoredPerSecond"]::before,
+        b[data-i18n="common:simulationResults.manaRestoredPerSecond"]::before,
+        b[data-i18n="common:simulationResults.damageDoneTotal"]::before,
+        b[data-i18n="common:simulationResults.damageTakenTotal"]::before,
+        b[data-i18n="common:revenue"]::before,
+        b[data-i18n="common:expense"]::before,
+        b[data-i18n="common:profit"]::before,
+        b[data-i18n="common:noRNGRevenue"]::before,
+        b[data-i18n="common:noRNGProfit"]::before,
+        b[data-i18n="common:afterTaxNoRNGProfit"]::before,
+        b[data-i18n="common:dropDetails"]::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 1em;
+            border-radius: 2px;
+            background: var(--accent);
+        }
+
+        /* 模拟结果子标题（嵌入 <span> 内的）用更紧凑的样式 */
+        b:has(> [data-i18n="common:simulationResults.damageDoneTotal"]),
+        b:has(> [data-i18n="common:simulationResults.damageTakenTotal"]),
+        b:has(> [data-i18n="common:revenue"]),
+        b:has(> [data-i18n="common:expense"]),
+        b:has(> [data-i18n="common:profit"]),
+        b:has(> [data-i18n="common:noRNGRevenue"]),
+        b:has(> [data-i18n="common:noRNGProfit"]),
+        b:has(> [data-i18n="common:afterTaxNoRNGProfit"]) {
+            display: inline-block;
+            position: relative;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 0.3px;
+            padding-left: 10px;
+            margin-bottom: 6px;
+        }
+
+        b:has(> [data-i18n="common:simulationResults.damageDoneTotal"])::before,
+        b:has(> [data-i18n="common:simulationResults.damageTakenTotal"])::before,
+        b:has(> [data-i18n="common:revenue"])::before,
+        b:has(> [data-i18n="common:expense"])::before,
+        b:has(> [data-i18n="common:profit"])::before,
+        b:has(> [data-i18n="common:noRNGRevenue"])::before,
+        b:has(> [data-i18n="common:noRNGProfit"])::before,
+        b:has(> [data-i18n="common:afterTaxNoRNGProfit"])::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 1em;
+            border-radius: 2px;
+            background: var(--accent);
+        }
+
+        /* ===== 模拟结果区：分区、分组、对齐 ===== */
+        /* 左列子标题：紧凑、深色 + 标签 - 值右对齐 */
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 > .row > b {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            padding-left: 8px;
+        }
+
+        /* 左列子标题色条：略小 */
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 > .row > b::before {
+            width: 2px;
+            height: 0.85em;
+            background: var(--text-muted);
+        }
+
+        /* 左列子项之间间距 */
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 > #simulationResultKills,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 > #simulationBossTime,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 > #simulationResultPlayerDeaths,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 > #simulationResultExperienceGain,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 > #simulationHpSpent,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 > #simulationResultConsumablesUsed,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 > #simulationResultManaUsed,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 > #simulationResultHealthRestored,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 > #simulationResultManaRestored {
+            margin-bottom: 14px;
+        }
+
+        /* 左列结果数据行：紧凑 + 虚线分隔 */
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 [id^="simulationResult"] .row,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 [id^="simulationBossTime"] .row,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 [id^="simulationHpSpent"] .row {
+            padding: 3px 0;
+            border-bottom: 1px dashed var(--border);
+            align-items: baseline;
+            font-size: 0.82rem;
+        }
+
+        /* 左列结果数据：值列右对齐、加粗 */
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 [id^="simulationResult"] .row > .col-md-8,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 [id^="simulationBossTime"] .row > .col-md-8,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 [id^="simulationHpSpent"] .row > .col-md-8 {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-muted);
+        }
+
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 [id^="simulationResult"] .row > .col-md-4,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 [id^="simulationBossTime"] .row > .col-md-4,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-5 [id^="simulationHpSpent"] .row > .col-md-4 {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* 右列（col-md-7）：每个子标题下方留更多间距 */
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 .row > b[data-i18n] {
+            margin-top: 0;
+        }
+
+        /* 右列主标题之间分组：使用 row pt-2 已有间距，额外加深背景 */
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 .row.pt-2 {
+            margin-top: 14px;
+            margin-bottom: 8px;
+            padding-top: 12px !important;
+            border-top: 1px solid var(--border);
+        }
+
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 .row.pt-2 > b {
+            font-size: 0.88rem;
+        }
+
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 .row.pt-2 > b::before {
+            height: 0.85em;
+        }
+
+        /* 经济结果 6 行（收入/支出/利润/期望收入/期望利润/税后期望利润）：紧凑、不带 border-top */
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 .row.pt-2:has(> b > [data-i18n="common:revenue"]),
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 .row.pt-2:has(> b > [data-i18n="common:expense"]),
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 .row.pt-2:has(> b > [data-i18n="common:profit"]),
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 .row.pt-2:has(> b > [data-i18n="common:noRNGRevenue"]),
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 .row.pt-2:has(> b > [data-i18n="common:noRNGProfit"]),
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 .row.pt-2:has(> b > [data-i18n="common:afterTaxNoRNGProfit"]) {
+            margin-top: 4px;
+            margin-bottom: 4px;
+            padding-top: 4px !important;
+            border-top: none;
+            font-size: 0.88rem;
+            color: var(--text);
+        }
+
+        /* 这 6 行的色条：隐藏（不像主子标题那样突出） */
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 .row.pt-2:has(> b > [data-i18n="common:revenue"]) > b::before,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 .row.pt-2:has(> b > [data-i18n="common:expense"]) > b::before,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 .row.pt-2:has(> b > [data-i18n="common:profit"]) > b::before,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 .row.pt-2:has(> b > [data-i18n="common:noRNGRevenue"]) > b::before,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 .row.pt-2:has(> b > [data-i18n="common:noRNGProfit"]) > b::before,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 .row.pt-2:has(> b > [data-i18n="common:afterTaxNoRNGProfit"]) > b::before {
+            display: none;
+        }
+
+        /* 右列数据表行（总伤害/总承受伤害/掉落物）：表头虚线 + 数据行柔和 */
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 [id^="simulationResultTotalDamage"] .row,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 #dropDetailRows .row {
+            padding: 3px 0;
+            font-size: 0.82rem;
+            align-items: baseline;
+        }
+
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 [id^="simulationResultTotalDamage"] .row:not(:first-child),
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 #dropDetailRows .row {
+            border-bottom: 1px dashed var(--border);
+        }
+
+        /* 右列表格表头：浅灰文字、紧凑 */
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 [id^="simulationResultTotalDamage"] .row:not(:first-child) b,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 #dropDetailContent > .row:first-child b {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* 右列数据表：值列右对齐、数字等宽 */
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 [id^="simulationResultTotalDamage"] .row .text-end,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) .col-md-7 #dropDetailRows .row .text-end {
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* 模拟结果区下拉框（造成伤害/承受伤害）：柔和、紧凑 */
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) #damageDoneFilter,
+        .container-fluid > .row.pt-3 > .col-md-5:has(> #simulationResultKills) #damageTakenFilter {
+            font-size: 0.85rem;
+            padding: 4px 8px;
+            background-color: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin-top: 4px;
+            margin-bottom: 8px;
+        }
+
+        /* ===== Combat Stats 展开/收起按钮：胶囊徽章样式 ===== */
+        .combat-stats-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            line-height: 1;
+            color: var(--accent);
+            background-color: transparent;
+            border: 1px solid var(--accent);
+            border-radius: 999px;
+            padding: 5px 10px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+        }
+
+        .combat-stats-toggle:hover {
+            background-color: var(--accent);
+            color: #ffffff;
+        }
+
+        .combat-stats-toggle:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .combat-stats-toggle__caret {
+            font-size: 0.7rem;
+            line-height: 1;
+            transition: transform 0.15s ease;
+        }
+
+        /* ===== Combat Stats：属性名不换行、值右对齐、行紧凑 ===== */
+        .container-fluid > .row.pt-3:first-of-type > .col-md-2 .row {
+            align-items: baseline;
+            padding: 2px 0;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .container-fluid > .row.pt-3:first-of-type > .col-md-2 .row > .col-md-8 {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+
+        .container-fluid > .row.pt-3:first-of-type > .col-md-2 .row > .col-md-4 {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            color: var(--text);
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        /* ===== 表单：label 靠左对齐 + 输入框紧凑 ===== */
+        .container-fluid > .row.pt-3:first-of-type label.col-form-label {
+            text-align: left;
+            padding-right: 10px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .container-fluid > .row.pt-3:first-of-type .row.mb-2 {
+            align-items: center;
+        }
+
         /* ===== 顶部 Header 导航条 ===== */
         header.app-header {
             background: linear-gradient(135deg, #2b3a4a, #1f2a38);
@@ -569,7 +888,7 @@
             <div class="d-flex align-items-center gap-2">
                 <span class="app-logo" aria-hidden="true"></span>
                 <span class="app-title">MWI Combat Simulator</span>
-                <span class="badge rounded-pill app-version">v1.0.1</span>
+                <span class="badge rounded-pill app-version">v1.0.2</span>
             </div>
             <div class="d-flex align-items-center gap-2" id="headerRight">
                 <a class="btn btn-sm btn-outline-light" href="https://github.com/aiwwb/milkywayidle_battle"
