@@ -12,8 +12,67 @@
             color: #f0f0f0;
         }
 
-        body.dark-mode header {
-            background-color: #666;
+        /* ===== 顶部 Header 导航条 ===== */
+        header.app-header {
+            background: linear-gradient(135deg, #2b3a4a, #1f2a38);
+            color: #f1f5f9;
+            border-radius: 10px;
+            padding: 10px 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+        }
+
+        .app-logo {
+            width: 10px;
+            height: 26px;
+            border-radius: 3px;
+            background: linear-gradient(180deg, #4da3ff, #0d6efd);
+            display: inline-block;
+        }
+
+        .app-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .app-version {
+            font-size: 0.7rem;
+            vertical-align: middle;
+        }
+
+        body.dark-mode header.app-header {
+            background: linear-gradient(135deg, #3a4a5c, #2b3a4a);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+        }
+
+        /* ===== 模拟进度条 ===== */
+        #simulationProgressWrap {
+            height: 1.5rem;
+            background-color: #e9ecef;
+        }
+
+        #simulationProgressBar {
+            transition: width 0.3s ease;
+        }
+
+        #simulationProgressText {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #212529;
+            z-index: 2;
+            white-space: nowrap;
+            pointer-events: none;
+            line-height: 1;
+        }
+
+        body.dark-mode #simulationProgressWrap {
+            background-color: #555;
+        }
+
+        body.dark-mode #simulationProgressText {
+            color: #ffffff;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
         }
 
         body.dark-mode input[type="number"],
@@ -257,6 +316,19 @@
 </head>
 
 <body class="p-3">
+    <header class="app-header">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <span class="app-logo" aria-hidden="true"></span>
+                <span class="app-title">MWI Combat Simulator</span>
+                <span class="badge rounded-pill text-bg-secondary app-version">v1.0.1</span>
+            </div>
+            <div class="d-flex align-items-center gap-2" id="headerRight">
+                <a class="btn btn-sm btn-outline-light" href="https://github.com/aiwwb/milkywayidle_battle"
+                    target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+        </div>
+    </header>
     <div class="container-fluid">
         <ul class="nav nav-tabs" id="playerTab" role="tablist">
             <li class="nav-item">
@@ -834,9 +906,11 @@
                                 </button>
                             </div>
                             <div class="col align-self-center">
-                                <div class="progress">
+                                <div class="progress position-relative" id="simulationProgressWrap">
                                     <div id="simulationProgressBar" class="progress-bar" role="progressbar"
                                         style="width: 0%"></div>
+                                    <span id="simulationProgressText"
+                                        class="position-absolute top-50 start-50 translate-middle"></span>
                                 </div>
                             </div>
                             <div class="col-md-auto">
@@ -859,15 +933,25 @@
                                 </button>
                             </div>
                             <div class="col-md-auto">
-                                <div class="btn-group" role="group" aria-label="Dark Mode">
-                                    <label class="btn btn-light mb-0 d-flex align-items-center justify-content-center"
-                                        for="darkModeToggle">
-                                        <input type="checkbox" id="darkModeToggle"
-                                            style="width: 1.25em; height: 1.25em; margin: 0; cursor: pointer;">
-                                    </label>
-                                    <span class="btn btn-primary" style="cursor: default;"
-                                        data-i18n="common:controls.darkMode">Dark Mode</span>
-                                </div>
+                                <button type="button" id="darkModeToggle"
+                                    class="btn btn-outline-secondary d-inline-flex align-items-center gap-1"
+                                    title="Toggle Dark Mode" aria-label="Toggle Dark Mode">
+                                    <span id="darkModeIconMoon" aria-hidden="true">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            fill="currentColor" viewBox="0 0 16 16">
+                                            <path
+                                                d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z" />
+                                        </svg>
+                                    </span>
+                                    <span id="darkModeIconSun" class="d-none" aria-hidden="true">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            fill="currentColor" viewBox="0 0 16 16">
+                                            <path
+                                                d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z" />
+                                        </svg>
+                                    </span>
+                                    <span data-i18n="common:controls.darkMode">Dark Mode</span>
+                                </button>
                             </div>
                         </div>
                         <div class="row mb-2 pt-3">

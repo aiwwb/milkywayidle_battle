@@ -12037,17 +12037,16 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 添加语言切换器
+    // 添加语言切换器（插入顶部 Header 右侧；Header 不存在时退回悬浮右上角）
     function addLanguageSwitcher() {
         const switcherContainer = document.createElement('div');
         switcherContainer.className = 'language-switcher';
-        switcherContainer.style.position = 'fixed';
-        switcherContainer.style.top = '10px';
-        switcherContainer.style.right = '10px';
-        switcherContainer.style.zIndex = '1000';
+        switcherContainer.style.display = 'flex';
+        switcherContainer.style.alignItems = 'center';
+        switcherContainer.style.gap = '4px';
 
         const changelogButton = document.createElement('button');
-        changelogButton.className = 'btn btn-sm btn-outline-secondary';
+        changelogButton.className = 'btn btn-sm btn-outline-light';
         changelogButton.setAttribute('data-i18n', 'common:patchNotes');
         changelogButton.textContent = i18next.t('common:patchNotes') || 'Patch Notes';
         changelogButton.onclick = function () {
@@ -12055,21 +12054,21 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         const enButton = document.createElement('button');
-        enButton.className = 'btn btn-sm ' + (i18next.language === 'en' ? 'btn-primary' : 'btn-outline-primary');
+        enButton.className = 'btn btn-sm ' + (i18next.language === 'en' ? 'btn-primary' : 'btn-outline-light');
         enButton.textContent = "English";
         enButton.onclick = function () {
             i18next.changeLanguage('en').then(updateContent);
             enButton.className = 'btn btn-sm btn-primary';
-            zhButton.className = 'btn btn-sm btn-outline-primary';
+            zhButton.className = 'btn btn-sm btn-outline-light';
         };
 
         const zhButton = document.createElement('button');
-        zhButton.className = 'btn btn-sm ' + (i18next.language === 'zh' ? 'btn-primary' : 'btn-outline-primary');
+        zhButton.className = 'btn btn-sm ' + (i18next.language === 'zh' ? 'btn-primary' : 'btn-outline-light');
         zhButton.textContent = "中文";
         zhButton.onclick = function () {
             i18next.changeLanguage('zh').then(updateContent);
             zhButton.className = 'btn btn-sm btn-primary';
-            enButton.className = 'btn btn-sm btn-outline-primary';
+            enButton.className = 'btn btn-sm btn-outline-light';
         };
 
         switcherContainer.appendChild(changelogButton);
@@ -12078,6 +12077,15 @@ document.addEventListener('DOMContentLoaded', function () {
         switcherContainer.appendChild(document.createTextNode(' '));
         switcherContainer.appendChild(zhButton);
 
-        document.body.appendChild(switcherContainer);
+        const headerRight = document.getElementById('headerRight');
+        if (headerRight) {
+            headerRight.prepend(switcherContainer);
+        } else {
+            switcherContainer.style.position = 'fixed';
+            switcherContainer.style.top = '10px';
+            switcherContainer.style.right = '10px';
+            switcherContainer.style.zIndex = '1000';
+            document.body.appendChild(switcherContainer);
+        }
     }
 });

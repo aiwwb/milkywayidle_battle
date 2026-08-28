@@ -27,7 +27,33 @@ const ONE_HOUR = 60 * 60 * ONE_SECOND;
 let buttonStartSimulation = document.getElementById("buttonStartSimulation");
 let buttonStopSimulation = document.getElementById("buttonStopSimulation");
 let progressbar = document.getElementById("simulationProgressBar");
+let progressText = document.getElementById("simulationProgressText");
 let simStartTime = 0;
+
+// 统一更新进度条：百分比 + 耗时文字 + 状态样式（进行中条纹动画，完成变绿）
+function setProgress(progress) {
+    progressbar.style.width = progress + "%";
+    if (progressText) {
+        progressText.textContent =
+            progress + "% (" + ((Date.now() - simStartTime) / 1000).toFixed(2) + "s)";
+    }
+    if (progress >= 100) {
+        progressbar.classList.remove("progress-bar-striped", "progress-bar-animated");
+        progressbar.classList.add("bg-success");
+    } else {
+        progressbar.classList.add("progress-bar-striped", "progress-bar-animated");
+        progressbar.classList.remove("bg-success");
+    }
+}
+
+// 重置进度条为初始状态（模拟开始 / 停止时调用）
+function resetProgress() {
+    progressbar.style.width = "0%";
+    if (progressText) {
+        progressText.textContent = "0%";
+    }
+    progressbar.classList.remove("progress-bar-striped", "progress-bar-animated", "bg-success");
+}
 
 let worker = new Worker(new URL("worker.js", import.meta.url));
 let multiWorker = new Worker(new URL("multiWorker.js", import.meta.url));
@@ -76,8 +102,7 @@ const COIN_HRID = "/items/coin";
 function onWorkerMessage(event) {
     switch (event.data.type) {
         case "simulation_result":
-            progressbar.style.width = "100%";
-            progressbar.innerHTML = "100% (" + ((Date.now() - simStartTime) / 1000).toFixed(2) + "s)";
+            setProgress(100);
             //console.log("SIM RESULTS: ", event.data.simResult);
             showSimulationResult(event.data.simResult);
             updateContent();
@@ -87,8 +112,7 @@ function onWorkerMessage(event) {
             break;
         case "simulation_progress":
             let progress = Math.floor(100 * event.data.progress);
-            progressbar.style.width = progress + "%";
-            progressbar.innerHTML = progress + "% (" + ((Date.now() - simStartTime) / 1000).toFixed(2) + "s)";
+            setProgress(progress);
             // 实时更新图表
             if (event.data.timeSeriesData && document.getElementById('hpMpVisualizationToggle').checked) {
                 updateChartsRealtime(event.data.timeSeriesData);
@@ -104,8 +128,7 @@ function onMultiWorkerMessage(event) {
     switch (event.data.type) {
         case "simulation_result_allZones":
         case "simulation_result_allLabyrinths":
-            progressbar.style.width = "100%";
-            progressbar.innerHTML = "100% (" + ((Date.now() - simStartTime) / 1000).toFixed(2) + "s)";
+            setProgress(100);
             showAllSimulationResults(event.data.simResults);
             updateContent();
             buttonStartSimulation.disabled = false;
@@ -114,8 +137,7 @@ function onMultiWorkerMessage(event) {
             break;
         case "simulation_progress":
             let progress = Math.floor(100 * event.data.progress);
-            progressbar.style.width = progress + "%";
-            progressbar.innerHTML = progress + "% (" + ((Date.now() - simStartTime) / 1000).toFixed(2) + "s)";
+            setProgress(progress);
             break;
         case "simulation_error":
             showErrorModal(event.data.error.toString());
@@ -3138,8 +3160,7 @@ function initSimulationControls() {
 
     buttonStopSimulation.style.display = 'none';
     buttonStopSimulation.addEventListener("click", (event) => {
-        progressbar.style.width = "0%";
-        progressbar.innerHTML = "0%";
+        resetProgress();
         if (worker) {
             worker.terminate();
         }
@@ -3160,6 +3181,7 @@ function initSimulationControls() {
 }
 
 function startSimulation(selectedPlayers) {
+    resetProgress();
     let simLabyrinthToggle = document.getElementById("simLabyrinthToggle");
     let simAllLabyrinthsToggle = document.getElementById("simAllLabyrinthsToggle");
 
@@ -3741,9 +3763,9 @@ function renderSelectedWipeEvent(index, simResult) {
             playerElement.textContent = `${player.hrid}: ${player.current}/${player.max}`;
 
             if (player.current <= 0) {
-                playerElement.style.color = darkModeToggle.checked ? '#FF6347' : '#CC0000';
+                playerElement.style.color = body.classList.contains('dark-mode') ? '#FF6347' : '#CC0000';
             } else if (damagedPlayers.has(player.hrid)) {
-                playerElement.style.color = darkModeToggle.checked ? '#00BFFF' : '#007BFF';
+                playerElement.style.color = body.classList.contains('dark-mode') ? '#00BFFF' : '#007BFF';
             }
 
             if (idx > 0) {
@@ -5073,23 +5095,31 @@ function updateUI() {
 
 const darkModeToggle = document.getElementById('darkModeToggle');
 const body = document.body;
+let darkModeEnabled = localStorage.getItem('darkModeEnabled') === 'true';
 
-if (localStorage.getItem('darkModeEnabled') === 'true') {
-    body.classList.add('dark-mode');
+// 应用/切换深色模式：body 类名 + 表格斑马纹 + 图标切换 + 持久化
+function applyDarkMode() {
+    body.classList.toggle('dark-mode', darkModeEnabled);
     const tables = document.getElementsByClassName('profit-table');
     for (const table of tables) {
-        table.classList.toggle('table-striped');
+        table.classList.toggle('table-striped', darkModeEnabled);
     }
-    darkModeToggle.checked = true;
+    const moonIcon = document.getElementById('darkModeIconMoon');
+    const sunIcon = document.getElementById('darkModeIconSun');
+    if (moonIcon) {
+        moonIcon.classList.toggle('d-none', darkModeEnabled);
+    }
+    if (sunIcon) {
+        sunIcon.classList.toggle('d-none', !darkModeEnabled);
+    }
+    localStorage.setItem('darkModeEnabled', darkModeEnabled);
 }
 
-darkModeToggle.addEventListener('change', () => {
-    body.classList.toggle('dark-mode');
-    const tables = document.getElementsByClassName('profit-table');
-    for (const table of tables) {
-        table.classList.toggle('table-striped');
-    }
-    localStorage.setItem('darkModeEnabled', darkModeToggle.checked);
+applyDarkMode();
+
+darkModeToggle.addEventListener('click', () => {
+    darkModeEnabled = !darkModeEnabled;
+    applyDarkMode();
 });
 
 function updateContent() {
