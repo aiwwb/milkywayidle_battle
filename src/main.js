@@ -150,7 +150,7 @@ function onMultiWorkerMessage(event) {
 // #region Equipment
 
 function initEquipmentSection() {
-    ["head", "body", "legs", "feet", "hands", "main_hand", "two_hand", "off_hand", "pouch", "neck", "earrings", "ring", "back", "charm"].forEach((type) => {
+    ["head", "body", "legs", "feet", "hands", "main_hand", "two_hand", "off_hand", "pouch", "neck", "ring", "earrings", "back", "charm"].forEach((type) => {
         initEquipmentSelect(type);
         initEnhancementLevelInput(type);
     });
@@ -425,7 +425,7 @@ function enhancementLevelInputHandler() {
 }
 
 function updateEquipmentState() {
-    ["head", "body", "legs", "feet", "hands", "main_hand", "two_hand", "off_hand", "pouch", "neck", "earrings", "ring", "back", "charm"].forEach((type) => {
+    ["head", "body", "legs", "feet", "hands", "main_hand", "two_hand", "off_hand", "pouch", "neck", "ring", "earrings", "back", "charm"].forEach((type) => {
         let equipmentType = "/equipment_types/" + type;
         let selectType = type;
         if (type == "main_hand" || type == "two_hand") {
@@ -3414,7 +3414,7 @@ function parsePlayerJson(playerJson, hrid) {
     };
     playerData.equipment = {};
     const triggerMap = playerJson.triggerMap;
-    ["head", "body", "legs", "feet", "hands", "off_hand", "pouch", "neck", "earrings", "ring", "back", "main_hand", "two_hand", "charm"].forEach((type) => {
+    ["head", "body", "legs", "feet", "hands", "off_hand", "pouch", "neck", "ring", "earrings", "back", "main_hand", "two_hand", "charm"].forEach((type) => {
         let currentEquipment = playerJson.player.equipment.find(item => item.itemLocationHrid === "/item_locations/" + type);
         if (currentEquipment){
             playerData.equipment[`/equipment_types/${type}`] = new Equipment(currentEquipment.itemHrid, currentEquipment.enhancementLevel);
@@ -3973,7 +3973,7 @@ function getEquipmentSetFromUI() {
         equipmentSet.levels[skill] = Number(levelInput.value);
     });
 
-    ["head", "body", "legs", "feet", "hands", "weapon", "off_hand", "pouch", "neck", "earrings", "ring", "back", "charm"].forEach((type) => {
+    ["head", "body", "legs", "feet", "hands", "weapon", "off_hand", "pouch", "neck", "ring", "earrings", "back", "charm"].forEach((type) => {
         let equipmentSelect = document.getElementById("selectEquipment_" + type);
         let enhancementLevelInput = document.getElementById("inputEquipmentEnhancementLevel_" + type);
 
@@ -4042,7 +4042,7 @@ function loadEquipmentSetIntoUI(equipmentSet) {
         levelInput.value = equipmentSet.levels[skill] ?? 1;
     });
 
-    ["head", "body", "legs", "feet", "hands", "weapon", "off_hand", "pouch", "neck", "earrings", "ring", "back", "charm"].forEach((type) => {
+    ["head", "body", "legs", "feet", "hands", "weapon", "off_hand", "pouch", "neck", "ring", "earrings", "back", "charm"].forEach((type) => {
         let equipmentSelect = document.getElementById("selectEquipment_" + type);
         let enhancementLevelInput = document.getElementById("inputEquipmentEnhancementLevel_" + type);
 
@@ -4319,7 +4319,7 @@ function doSoloImport() {
         levelInput.value = importSet.player[skill + "Level"];
     });
 
-    ["head", "body", "legs", "feet", "hands", "off_hand", "pouch", "neck", "earrings", "ring", "back", "charm"].forEach((type) => {
+    ["head", "body", "legs", "feet", "hands", "off_hand", "pouch", "neck", "ring", "earrings", "back", "charm"].forEach((type) => {
         let equipmentSelect = document.getElementById("selectEquipment_" + type);
         let enhancementLevelInput = document.getElementById("inputEquipmentEnhancementLevel_" + type);
         let currentEquipment = importSet.player.equipment.find(item => item.itemLocationHrid === "/item_locations/" + type);
@@ -4537,7 +4537,7 @@ function updateNextPlayer(currentPlayerNumber) {
         levelInput.value = importSet.player[skill + "Level"];
     });
 
-    ["head", "body", "legs", "feet", "hands", "off_hand", "pouch", "neck", "earrings", "ring", "back", "charm"].forEach((type) => {
+    ["head", "body", "legs", "feet", "hands", "off_hand", "pouch", "neck", "ring", "earrings", "back", "charm"].forEach((type) => {
 
         let equipmentSelect = document.getElementById("selectEquipment_" + type);
         let enhancementLevelInput = document.getElementById("inputEquipmentEnhancementLevel_" + type);
