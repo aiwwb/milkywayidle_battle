@@ -2994,6 +2994,37 @@
             border-color: #4a5470 !important;
             background-color: transparent !important;
         }
+
+        /* ===== 表单控件统一：字号、padding、min-width ===== */
+        .form-control,
+        .form-select,
+        .col-form-label,
+        input[type="number"],
+        input[type="text"] {
+            font-size: 0.95rem !important;
+        }
+
+        .form-control,
+        .form-select {
+            padding: 0.45rem 0.75rem !important;
+            line-height: 1.5 !important;
+        }
+
+        .col-form-label {
+            padding-top: 0.45rem !important;
+            padding-bottom: 0.45rem !important;
+        }
+
+        /* 去掉历史遗留的怪 min-width，让 input/select 自适应 */
+        .form-control {
+            min-width: 0 !important;
+        }
+
+        /* 输入与同行的 label 中心对齐 */
+        .row.mb-2 > [class*="col-"] {
+            display: flex;
+            align-items: center;
+        }
     </style>
 </body>
 
