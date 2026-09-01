@@ -2872,6 +2872,44 @@
             </p>
         </div>
     </footer>
+    <script>
+        // Sunrishe 工具箱会在本页注入「单人/组队导入」按钮；检测到说明已安装，无需再展示工具箱推广提示。
+        (function () {
+            var TOOLBOX_BUTTON_ID = 'mst-combat-sim-import';
+            var TOOLBOX_BUTTON_TEXTS = ['单人/组队导入', 'Import solo/group'];
+
+            function hasToolboxButton() {
+                if (document.getElementById(TOOLBOX_BUTTON_ID)) return true;
+                return Array.prototype.some.call(document.querySelectorAll('button'), function (btn) {
+                    var text = btn.textContent || '';
+                    return TOOLBOX_BUTTON_TEXTS.some(function (t) { return text.includes(t); });
+                });
+            }
+
+            function syncPromo() {
+                var promo = document.querySelector('.sunrishe-promo');
+                if (!promo) return true; // 提示条不在本页时停止检测
+                if (!hasToolboxButton()) return false;
+                promo.style.display = 'none'; // 已安装工具箱，隐藏推广提示
+                return true;
+            }
+
+            function start() {
+                if (syncPromo()) return;
+                // 工具箱注入时机晚于页面加载，持续观察 DOM 直到按钮出现
+                var observer = new MutationObserver(function () {
+                    if (syncPromo()) observer.disconnect();
+                });
+                observer.observe(document.body, { childList: true, subtree: true });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', start);
+            } else {
+                start();
+            }
+        })();
+    </script>
 </body>
 
 </html>
