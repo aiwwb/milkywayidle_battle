@@ -442,6 +442,63 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
         }
 
+        /* ===== 标题旁的 Sunrishe 工具箱推广提示（醒目胶囊） ===== */
+        .sunrishe-promo {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            line-height: 1.4;
+            text-decoration: none;
+            color: #3d2600;
+            background: linear-gradient(135deg, #ffe08a, #ffb347 55%, #ff8a2b);
+            box-shadow: 0 0 0 2px rgba(255, 214, 120, 0.35), 0 2px 10px rgba(255, 140, 40, 0.45);
+            white-space: nowrap;
+            animation: sunrishe-promo-pulse 2s ease-in-out infinite;
+        }
+
+        .sunrishe-promo:hover,
+        .sunrishe-promo:focus-visible {
+            color: #241500;
+            transform: translateY(-1px);
+            box-shadow: 0 0 0 3px rgba(255, 214, 120, 0.5), 0 4px 14px rgba(255, 140, 40, 0.6);
+        }
+
+        .sunrishe-promo b {
+            font-weight: 800;
+        }
+
+        .sunrishe-promo-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #d9480f;
+            box-shadow: 0 0 0 3px rgba(217, 72, 15, 0.25);
+            flex: none;
+        }
+
+        .sunrishe-promo-arrow {
+            font-size: 1rem;
+            font-weight: 700;
+            opacity: 0.75;
+        }
+
+        @keyframes sunrishe-promo-pulse {
+            0%, 100% { box-shadow: 0 0 0 2px rgba(255, 214, 120, 0.35), 0 2px 10px rgba(255, 140, 40, 0.45); }
+            50%      { box-shadow: 0 0 0 6px rgba(255, 190, 80, 0.18), 0 2px 14px rgba(255, 140, 40, 0.65); }
+        }
+
+        @media (max-width: 576px) {
+            .sunrishe-promo {
+                font-size: 0.78rem;
+                padding: 4px 10px;
+                white-space: normal;
+            }
+        }
+
         /* ===== 模拟进度条 ===== */
         #simulationProgressWrap {
             height: 1.5rem;
@@ -521,60 +578,6 @@
             border-color: var(--border) var(--border) var(--surface);
         }
 
-        /* ===== 按钮主题：实心主操作 + 幽灵次要操作 ===== */
-        .btn-primary {
-            background-color: #1e4e8c;
-            border-color: #1e4e8c;
-            color: #ffffff;
-        }
-
-        .btn-primary:hover,
-        .btn-primary:focus {
-            background-color: #2a5fa3;
-            border-color: #2a5fa3;
-            color: #ffffff;
-        }
-
-        .btn-primary:active {
-            background-color: #183e70;
-            border-color: #183e70;
-            color: #ffffff;
-        }
-
-        .btn-primary:disabled,
-        .btn-primary.disabled {
-            background-color: #9db4d4;
-            border-color: #9db4d4;
-            color: #ffffff;
-        }
-
-        /* 幽灵按钮（次要操作/入口）：透明底 + 主题色边框文字 */
-        .btn-outline-primary {
-            color: #1e4e8c;
-            border-color: #2b4a76;
-            background-color: transparent;
-        }
-
-        .btn-outline-primary:hover,
-        .btn-outline-primary:focus {
-            color: #1e4e8c;
-            background-color: #e8eef7;
-            border-color: #2b4a76;
-        }
-
-        .btn-outline-primary:active {
-            color: #183e70;
-            background-color: #d6e2f0;
-            border-color: #183e70;
-        }
-
-        .btn-outline-primary:disabled,
-        .btn-outline-primary.disabled {
-            color: #9db4d4;
-            border-color: #c6d2e2;
-            background-color: transparent;
-        }
-
         /* 深色模式：按钮色调降饱和，避免在深底上刺眼 */
         body.dark-mode .btn-primary {
             background-color: #2b5da3;
@@ -594,33 +597,6 @@
             background-color: #1e3a63;
             border-color: #1e3a63;
             color: #9aa5b1;
-        }
-
-        /* 深色模式：幽灵按钮走亮蓝描边，在深底上清晰可辨 */
-        body.dark-mode .btn-outline-primary {
-            color: #bcd0eb;
-            border-color: #5e7ca8;
-            background-color: transparent;
-        }
-
-        body.dark-mode .btn-outline-primary:hover,
-        body.dark-mode .btn-outline-primary:focus {
-            color: #ffffff;
-            background-color: #2c4566;
-            border-color: #6e8cba;
-        }
-
-        body.dark-mode .btn-outline-primary:active {
-            color: #ffffff;
-            background-color: #1e3454;
-            border-color: #6e8cba;
-        }
-
-        body.dark-mode .btn-outline-primary:disabled,
-        body.dark-mode .btn-outline-primary.disabled {
-            color: #6c7a8a;
-            border-color: #3a4350;
-            background-color: transparent;
         }
 
         body.dark-mode .btn-danger {
@@ -970,6 +946,12 @@
                 <span class="app-logo" aria-hidden="true"></span>
                 <span class="app-title">MWI Combat Simulator</span>
                 <span class="badge rounded-pill app-version">v1.0.2</span>
+                <a class="sunrishe-promo" href="https://greasyfork.org/zh-CN/scripts/574037" target="_blank"
+                    rel="noopener noreferrer" title="点击前往 Sunrishe 工具箱安装页">
+                    <span class="sunrishe-promo-dot" aria-hidden="true"></span>
+                    <span>建议搭配 <b>Sunrishe 工具箱</b> 使用，支持一键导入配置</span>
+                    <span class="sunrishe-promo-arrow" aria-hidden="true">&rsaquo;</span>
+                </a>
             </div>
             <div class="d-flex align-items-center gap-2" id="headerRight">
                 <a class="btn btn-sm btn-outline-light" href="https://github.com/aiwwb/milkywayidle_battle"
@@ -1061,15 +1043,15 @@
                         </div>
                         <div class="row mb-2">
                             <div class="col-12 d-flex gap-1">
-                                <button id="buttonHouseRoomsModal" class="btn btn-outline-primary flex-fill" type="button"
+                                <button id="buttonHouseRoomsModal" class="btn btn-primary flex-fill" type="button"
                                     data-bs-toggle="modal" data-bs-target="#houseRoomsModal" data-i18n="characterManagement.house">
                                     House Rooms
                                 </button>
-                                <button id="buttonAchievementsModal" class="btn btn-outline-primary flex-fill" type="button"
+                                <button id="buttonAchievementsModal" class="btn btn-primary flex-fill" type="button"
                                     data-bs-toggle="modal" data-bs-target="#achievementsModal" data-i18n="achievementsPanel.achievements">
                                     Achievements
                                 </button>
-                                <button id="buttonShrinesModal" class="btn btn-outline-primary flex-fill" type="button"
+                                <button id="buttonShrinesModal" class="btn btn-primary flex-fill" type="button"
                                     data-bs-toggle="modal" data-bs-target="#shrinesModal" data-i18n="characterManagement.shrine">
                                     Shrines
                                 </button>
@@ -1227,18 +1209,6 @@
                             </div>
                         </div>
                         <div class="row mb-2">
-                            <label for="selectEquipment_earrings" class="col-md-2 col-form-label" data-i18n="characterItemsUtil.earrings">Earrings</label>
-                            <div class="col-md-6">
-                                <select id="selectEquipment_earrings" class="form-select">
-                                    <option value="" data-i18n="characterSelectPage.slots.empty">Empty</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <input type="number" id="inputEquipmentEnhancementLevel_earrings" class="form-control"
-                                    value="0" min="0" max="20" required />
-                            </div>
-                        </div>
-                        <div class="row mb-2">
                             <label for="selectEquipment_ring" class="col-md-2 col-form-label" data-i18n="characterItemsUtil.ring">Ring</label>
                             <div class="col-md-6">
                                 <select id="selectEquipment_ring" class="form-select">
@@ -1247,6 +1217,18 @@
                             </div>
                             <div class="col-md-4">
                                 <input type="number" id="inputEquipmentEnhancementLevel_ring" class="form-control"
+                                    value="0" min="0" max="20" required />
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label for="selectEquipment_earrings" class="col-md-2 col-form-label" data-i18n="characterItemsUtil.earrings">Earrings</label>
+                            <div class="col-md-6">
+                                <select id="selectEquipment_earrings" class="form-select">
+                                    <option value="" data-i18n="characterSelectPage.slots.empty">Empty</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="number" id="inputEquipmentEnhancementLevel_earrings" class="form-control"
                                     value="0" min="0" max="20" required />
                             </div>
                         </div>
@@ -1309,7 +1291,7 @@
                                 </select>
                             </div>
                             <div class="col-md-auto">
-                                <button id="buttonFoodTrigger_0" class="btn btn-outline-primary" type="button"
+                                <button id="buttonFoodTrigger_0" class="btn btn-primary" type="button"
                                     data-bs-toggle="modal" data-bs-target="#triggerModal" data-bs-triggertype="food"
                                     data-bs-triggerindex="0">
                                     Trigger
@@ -1323,7 +1305,7 @@
                                 </select>
                             </div>
                             <div class="col-md-auto">
-                                <button id="buttonFoodTrigger_1" class="btn btn-outline-primary" type="button"
+                                <button id="buttonFoodTrigger_1" class="btn btn-primary" type="button"
                                     data-bs-toggle="modal" data-bs-target="#triggerModal" data-bs-triggertype="food"
                                     data-bs-triggerindex="1">
                                     Trigger
@@ -1337,7 +1319,7 @@
                                 </select>
                             </div>
                             <div class="col-md-auto">
-                                <button id="buttonFoodTrigger_2" class="btn btn-outline-primary" type="button"
+                                <button id="buttonFoodTrigger_2" class="btn btn-primary" type="button"
                                     data-bs-toggle="modal" data-bs-target="#triggerModal" data-bs-triggertype="food"
                                     data-bs-triggerindex="2">
                                     Trigger
@@ -1356,7 +1338,7 @@
                                 </select>
                             </div>
                             <div class="col-md-auto">
-                                <button id="buttonDrinkTrigger_0" class="btn btn-outline-primary" type="button"
+                                <button id="buttonDrinkTrigger_0" class="btn btn-primary" type="button"
                                     data-bs-toggle="modal" data-bs-target="#triggerModal" data-bs-triggertype="drink"
                                     data-bs-triggerindex="0">
                                     Trigger
@@ -1370,7 +1352,7 @@
                                 </select>
                             </div>
                             <div class="col-md-auto">
-                                <button id="buttonDrinkTrigger_1" class="btn btn-outline-primary" type="button"
+                                <button id="buttonDrinkTrigger_1" class="btn btn-primary" type="button"
                                     data-bs-toggle="modal" data-bs-target="#triggerModal" data-bs-triggertype="drink"
                                     data-bs-triggerindex="1">
                                     Trigger
@@ -1384,7 +1366,7 @@
                                 </select>
                             </div>
                             <div class="col-md-auto">
-                                <button id="buttonDrinkTrigger_2" class="btn btn-outline-primary" type="button"
+                                <button id="buttonDrinkTrigger_2" class="btn btn-primary" type="button"
                                     data-bs-toggle="modal" data-bs-target="#triggerModal" data-bs-triggertype="drink"
                                     data-bs-triggerindex="2">
                                     Trigger
@@ -1406,13 +1388,13 @@
                         </div>
                         <div class="row pt-3">
                             <div class="col-md-auto">
-                                <button id="buttonWipeEvents" class="btn btn-outline-primary" type="button"
+                                <button id="buttonWipeEvents" class="btn btn-primary" type="button"
                                     data-bs-toggle="modal" data-bs-target="#WipeEventsModal" data-i18n="common:WipeEvents">
                                     Wipe Events
                                 </button>
                             </div>
                             <div class="col-md-auto">
-                                <button id="buttonExperimentalFeatures" class="btn btn-outline-primary" type="button"
+                                <button id="buttonExperimentalFeatures" class="btn btn-primary" type="button"
                                     data-bs-toggle="modal" data-bs-target="#ExperimentalFeaturesModal" data-i18n="common:Experiment.ExperimentalFeatures">
                                     Experiment Feautres
                                 </button>
@@ -1450,14 +1432,14 @@
                                     max="400" required />
                             </div>
                             <div class="col-md-auto">
-                                <button id="buttonAbilityTrigger_0" class="btn btn-outline-primary" type="button"
+                                <button id="buttonAbilityTrigger_0" class="btn btn-primary" type="button"
                                     data-bs-toggle="modal" data-bs-target="#triggerModal" data-bs-triggertype="ability"
                                     data-bs-triggerindex="0">
                                     Trigger
                                 </button>
                             </div>
                             <div class="col-md-auto" style="display: none;">
-                                <button id="selectAbilityMoveUp_0" class="btn btn-outline-primary" type="button" disabled>#</button>
+                                <button id="selectAbilityMoveUp_0" class="btn btn-primary" type="button" disabled>#</button>
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -1471,14 +1453,14 @@
                                     max="400" required />
                             </div>
                             <div class="col-md-auto">
-                                <button id="buttonAbilityTrigger_1" class="btn btn-outline-primary" type="button"
+                                <button id="buttonAbilityTrigger_1" class="btn btn-primary" type="button"
                                     data-bs-toggle="modal" data-bs-target="#triggerModal" data-bs-triggertype="ability"
                                     data-bs-triggerindex="1">
                                     Trigger
                                 </button>
                             </div>
                             <div class="col-md-auto" style="display: none;">
-                                <button id="selectAbilityMoveUp_1" class="btn btn-outline-primary" type="button" disabled>#</button>
+                                <button id="selectAbilityMoveUp_1" class="btn btn-primary" type="button" disabled>#</button>
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -1492,14 +1474,14 @@
                                     max="400" required />
                             </div>
                             <div class="col-md-auto">
-                                <button id="buttonAbilityTrigger_2" class="btn btn-outline-primary" type="button"
+                                <button id="buttonAbilityTrigger_2" class="btn btn-primary" type="button"
                                     data-bs-toggle="modal" data-bs-target="#triggerModal" data-bs-triggertype="ability"
                                     data-bs-triggerindex="2">
                                     Trigger
                                 </button>
                             </div>
                             <div class="col-md-auto" style="display: none;">
-                                <button id="selectAbilityMoveUp_2" class="btn btn-outline-primary" type="button">↑</button>
+                                <button id="selectAbilityMoveUp_2" class="btn btn-primary" type="button">↑</button>
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -1513,14 +1495,14 @@
                                     max="400" required />
                             </div>
                             <div class="col-md-auto">
-                                <button id="buttonAbilityTrigger_3" class="btn btn-outline-primary" type="button"
+                                <button id="buttonAbilityTrigger_3" class="btn btn-primary" type="button"
                                     data-bs-toggle="modal" data-bs-target="#triggerModal" data-bs-triggertype="ability"
                                     data-bs-triggerindex="3">
                                     Trigger
                                 </button>
                             </div>
                             <div class="col-md-auto" style="display: none;">
-                                <button id="selectAbilityMoveUp_3" class="btn btn-outline-primary" type="button">↑</button>
+                                <button id="selectAbilityMoveUp_3" class="btn btn-primary" type="button">↑</button>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -1534,14 +1516,14 @@
                                     max="400" required />
                             </div>
                             <div class="col-md-auto">
-                                <button id="buttonAbilityTrigger_4" class="btn btn-outline-primary" type="button"
+                                <button id="buttonAbilityTrigger_4" class="btn btn-primary" type="button"
                                     data-bs-toggle="modal" data-bs-target="#triggerModal" data-bs-triggertype="ability"
                                     data-bs-triggerindex="4">
                                     Trigger
                                 </button>
                             </div>
                             <div class="col-md-auto" style="display: none;">
-                                <button id="selectAbilityMoveUp_4" class="btn btn-outline-primary" type="button">↑</button>
+                                <button id="selectAbilityMoveUp_4" class="btn btn-primary" type="button">↑</button>
                             </div>
                         </div>
                         <!-- #endregion-->
@@ -1569,7 +1551,7 @@
                         </div>
                         <div class="row">
                             <div class="col-md-auto">
-                                <button id="buttonEquipmentSets" class="btn btn-outline-primary" type="button"
+                                <button id="buttonEquipmentSets" class="btn btn-primary" type="button"
                                     data-bs-toggle="modal" data-bs-target="#equipmentSetsModal" data-i18n="common:controls.equipmentSets">
                                     Equipment Sets
                                 </button>
@@ -1604,7 +1586,7 @@
                         </div>
                         <div class="row mb-2 pt-3">
                             <div class="col-md-auto">
-                                <button id="buttonShowAllSimData" class="btn btn-outline-primary" type="button"
+                                <button id="buttonShowAllSimData" class="btn btn-primary" type="button"
                                     data-bs-toggle="modal" data-bs-target="#allSimsModal" style="display: none;" data-i18n="common:allZonesData">
                                     All Zones Data
                                 </button>
@@ -2183,12 +2165,12 @@
                         </div>
                         <div class="row pt-2">
                             <div class="col-md-6 text-center">
-                                <button type="button" class="btn btn-outline-primary" id="buttonAddTrigger" data-i18n="combatTriggersSetting.addCondition">
+                                <button type="button" class="btn btn-primary" id="buttonAddTrigger" data-i18n="combatTriggersSetting.addCondition">
                                     Add condition
                                 </button>
                             </div>
                             <div class="col-md-6 text-center">
-                                <button type="button" class="btn btn-outline-primary" id="buttonDefaultTrigger" data-i18n="combatTriggersSetting.resetDefault">
+                                <button type="button" class="btn btn-primary" id="buttonDefaultTrigger" data-i18n="combatTriggersSetting.resetDefault">
                                     Set to default
                                 </button>
                             </div>
@@ -2890,142 +2872,6 @@
             </p>
         </div>
     </footer>
-
-    <!-- 按钮主题覆盖：必须放在 Bootstrap CSS 之后；用 !important 兜底胜出 -->
-    <style>
-        /* 浅色：实心深蓝实操 */
-        .btn-primary {
-            background-color: #1e4e8c !important;
-            border-color: #1e4e8c !important;
-            color: #ffffff !important;
-        }
-
-        .btn-primary:hover,
-        .btn-primary:focus {
-            background-color: #2a5fa3 !important;
-            border-color: #2a5fa3 !important;
-            color: #ffffff !important;
-        }
-
-        .btn-primary:active {
-            background-color: #183e70 !important;
-            border-color: #183e70 !important;
-            color: #ffffff !important;
-        }
-
-        .btn-primary:disabled,
-        .btn-primary.disabled {
-            background-color: #9db4d4 !important;
-            border-color: #9db4d4 !important;
-            color: #ffffff !important;
-        }
-
-        /* 浅色：幽灵按钮（次要操作） */
-        .btn-outline-primary {
-            color: #1e4e8c !important;
-            border-color: #2b4a76 !important;
-            background-color: transparent !important;
-        }
-
-        .btn-outline-primary:hover,
-        .btn-outline-primary:focus {
-            color: #1e4e8c !important;
-            background-color: #e8eef7 !important;
-            border-color: #2b4a76 !important;
-        }
-
-        .btn-outline-primary:active {
-            color: #183e70 !important;
-            background-color: #d6e2f0 !important;
-            border-color: #183e70 !important;
-        }
-
-        .btn-outline-primary:disabled,
-        .btn-outline-primary.disabled {
-            color: #9db4d4 !important;
-            border-color: #c6d2e2 !important;
-            background-color: transparent !important;
-        }
-
-        /* 深色：实心降饱和 */
-        body.dark-mode .btn-primary {
-            background-color: #2b5da3 !important;
-            border-color: #2b5da3 !important;
-            color: #ffffff !important;
-        }
-
-        body.dark-mode .btn-primary:hover,
-        body.dark-mode .btn-primary:focus {
-            background-color: #3468b8 !important;
-            border-color: #3468b8 !important;
-            color: #ffffff !important;
-        }
-
-        body.dark-mode .btn-primary:disabled,
-        body.dark-mode .btn-primary.disabled {
-            background-color: #1e3a63 !important;
-            border-color: #1e3a63 !important;
-            color: #9aa5b1 !important;
-        }
-
-        /* 深色：幽灵按钮走亮蓝描边，深底上清晰 */
-        body.dark-mode .btn-outline-primary {
-            color: #e2eaf7 !important;
-            border-color: #7a96c2 !important;
-            background-color: transparent !important;
-        }
-
-        body.dark-mode .btn-outline-primary:hover,
-        body.dark-mode .btn-outline-primary:focus {
-            color: #ffffff !important;
-            background-color: #2c4566 !important;
-            border-color: #9ab1da !important;
-        }
-
-        body.dark-mode .btn-outline-primary:active {
-            color: #ffffff !important;
-            background-color: #1e3454 !important;
-            border-color: #9ab1da !important;
-        }
-
-        body.dark-mode .btn-outline-primary:disabled,
-        body.dark-mode .btn-outline-primary.disabled {
-            color: #9aa5b5 !important;
-            border-color: #4a5470 !important;
-            background-color: transparent !important;
-        }
-
-        /* ===== 表单控件统一：字号、padding、min-width ===== */
-        .form-control,
-        .form-select,
-        .col-form-label,
-        input[type="number"],
-        input[type="text"] {
-            font-size: 0.95rem !important;
-        }
-
-        .form-control,
-        .form-select {
-            padding: 0.45rem 0.75rem !important;
-            line-height: 1.5 !important;
-        }
-
-        .col-form-label {
-            padding-top: 0.45rem !important;
-            padding-bottom: 0.45rem !important;
-        }
-
-        /* 去掉历史遗留的怪 min-width，让 input/select 自适应 */
-        .form-control {
-            min-width: 0 !important;
-        }
-
-        /* 输入与同行的 label 中心对齐 */
-        .row.mb-2 > [class*="col-"] {
-            display: flex;
-            align-items: center;
-        }
-    </style>
 </body>
 
 </html>
