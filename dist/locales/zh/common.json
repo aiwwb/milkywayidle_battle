@@ -5,9 +5,6 @@
         "consumablePrices": "消耗品价格",
         "dropPrices": "掉落物价格"
     },
-    "equipment": {
-        "presets": "Presets"
-    },
     "player": "玩家",
     "trigger": "触发条件",
     "getPrices": "获取价格",
